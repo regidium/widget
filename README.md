@@ -1,2 +1,2 @@
-Regidium widget
+Widget Regidium
 ==========================

@@ -1,0 +1,18 @@
+(function() {
+
+    'use strict';
+
+    /* Services */
+    angular.module('regidiumApp')
+        .factory('config', function ($rootScope) {
+
+            $rootScope.config = {};
+            $rootScope.config.apiUrl = 'http://API_URL/api/v1/'
+            $rootScope.config.server = {};
+            $rootScope.config.server.io_url = 'http://io.regidium.loc';
+            $rootScope.config.server.io_port = '5000';
+
+            return $rootScope;
+        });
+
+})();

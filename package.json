@@ -1,0 +1,61 @@
+{
+    "name": "regidium-widget",
+    "version": "0.0.1",
+    "description": "Widget Regidium",
+    "keywords": [ "Regidium" ],
+    "homepage": "http://widget.regidium.com",
+    "bugs": {
+        "url": "http://github.com/regidium/widget/issues"
+    },
+    "license" : "none",
+    "author": {
+        "name": "Alexey Volkov",
+        "email": "alexey.wild88@gmail.com",
+        "url": "http://alexey-wild.tk"
+    },
+    "contributors": [],
+    "files": [
+        ".gitignore",
+        "AUTHORS",
+        "Capfile",
+        "package.json",
+        "README.md",
+        "server.js"
+    ],
+    "main": "./server.js",
+    "man" : "./README.md",
+    "directories": {
+        "config":"./config",
+        "public":"./public",
+        "src":"./lib",
+        "tests":"./tests"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/regidium/widget.git"
+    },
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "express": "3.x",
+        "async": "0.2.x",
+        "jade": "1.x",
+        "consolidate": "0.10.x",
+        "underscore": "1.5.x",
+        "cookie": "0.1.x",
+        "request": "2.30.x",
+        "sha1": "1.1.x",
+        "oauth": "0.9.x",
+        "qs": "0.6.x",
+        "socket.io": "0.9.x",
+        "redis": "0.10.x"
+    },
+    "os": ["linux"],
+    "cpu": ["x64"],
+    "engines": {
+        "node": "0.10.x",
+        "npm": "1.3.x"
+    },
+    "private": true
+}

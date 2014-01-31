@@ -1,0 +1,53 @@
+{
+    "env": "production",
+
+    "server": {
+        "port": 5001,
+        "url": "http://my.regidium.com",
+        "io_port": 5000,
+        "io_url": "http://io.regidium.loc"
+    },
+
+    "view": {
+        "cache": true
+    },
+
+    "session": {
+        "key": "sid",
+        "secret": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "max_age": 3600
+    },
+
+    "authorizer": {
+        "key": "security",
+        "secret": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    },
+
+    "backend": {
+        "url": "http://api.regidium.com/app_dev.php/api/v1/"
+    },
+
+    "external_services": {
+        "facebook": {
+            "id": "XXXX",
+            "secret": "YYYY",
+            "scope": "email"
+        },
+        "vkontakte": {
+            "id": "XXXX",
+            "secret": "YYYY",
+            "scope": ""
+        },
+        "twitter": {
+            "id": "XXXX",
+            "secret": "YYYY"
+        },
+        "google": {
+            "id": "XXXX.apps.googleusercontent.com",
+            "secret": "YYYY",
+            "scope": "openid profile https://www.googleapis.com/auth/userinfo.email",
+            "api_key": "ZZZZ"
+        }
+    }
+
+}
