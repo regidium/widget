@@ -1,206 +1,219 @@
 * {
-  padding: 0;
-  margin: 0;
+padding: 0;
+margin: 0;
+}
+#container {
+width: 312px;
+min-height: 185px;
+box-shadow: 0 0 3px #bab8b8;
+border-radius: 3px 3px 0 0;
+overflow: hidden;
+
+position: fixed;
+left: 300px;
+bottom: 0;
+font-family: Arial;
+margin: 200px 0 0 200px;
 }
 #header {
-  background: #ec1d23;
-  height: 28px;
-  padding: 13px 26px 0 22px;
-  font-size: 14px;
-  color: #fff;
-  line-height: 100%;
+background: #ec1d23;
+height: 28px;
+padding: 13px 26px 0 22px;
+font-size: 14px;
+color: #fff;
+line-height: 100%;
 }
 #header .status {
-  background: url(../img/open-arrow.png) right 3px no-repeat;
-  cursor: pointer;
+background: url(../img/open-arrow.png) right 3px no-repeat;
+cursor: pointer;
 }
 
 #content {
-  position: relative;
-  background: #fff;
+position: relative;
+background: #fff;
 }
 #employee {
-  height: 79px;
-  padding: 16px 0 0 22px;
-  background: #fbfbfb;
-  border-bottom: 1px solid #e6e6e6;
+height: 79px;
+padding: 16px 0 0 22px;
+background: #fbfbfb;
+border-bottom: 1px solid #e6e6e6;
 }
 #employee .photo {
-  float: left;
-  margin: 0 15px 0 0;
+float: left;
+margin: 0 15px 0 0;
 }
 #employee .name {
-  font-size: 14px;
-  font-weight: bold;
-  color: #2c2c2c;
-  line-height: 100%;
-  margin: 0 0 10px 0;
+font-size: 14px;
+font-weight: bold;
+color: #2c2c2c;
+line-height: 100%;
+margin: 0 0 10px 0;
 }
 #employee .name .first-name {
-  margin: 0 0 3px 0;
+margin: 0 0 3px 0;
 }
 #employee .post {
-  font-size: 12px;
-  color: #939393;
+font-size: 12px;
+color: #939393;
 }
 
 #message-input {
-  padding: 9px 9px 0 9px;
+padding: 9px 9px 0 9px;
 }
 #message-input textarea {
-  overflow: hidden;
-  resize: none;
-  border: 1px solid #d5d5d5;
-  width: 100%;
-  height: 30px;
-  font-size: 12px;
-  padding: 6px 10px 7px 6px;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
+overflow: hidden;
+resize: none;
+border: 1px solid #d5d5d5;
+width: 100%;
+height: 30px;
+font-size: 12px;
+padding: 6px 10px 7px 6px;
+-webkit-box-sizing: border-box;
+-moz-box-sizing: border-box;
+box-sizing: border-box;
 
-  font-family: Arial;
+font-family: Arial;
 }
 #message-input textarea {
-  background: #fff url(../img/textarea-copyright.png) 281px 20px no-repeat;
+background: #fff url(../img/textarea-copyright.png) 281px 20px no-repeat;
 }
 #message-input.full textarea {
-  background-image: none;
+background-image: none;
 }
 #message-input .message-input-content {
-  position: relative;
+position: relative;
 }
 #message-input .message-input-content span {
-  font-size: 12px;
-  color: #9c9891;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 275px;
-  height: 24px;
-  padding: 7px 10px 0 7px;
+font-size: 12px;
+color: #9c9891;
+position: absolute;
+top: 0;
+left: 0;
+width: 275px;
+height: 24px;
+padding: 7px 10px 0 7px;
 }
 #message-input.full .message-input-content span {
-  height: 71px;
+height: 71px;
 }
 
 #copyright {
-  font-size: 10px;
-  color: #918d85;
-  text-align: right;
-  padding: 5px 10px 4px 0;
+font-size: 10px;
+color: #918d85;
+text-align: right;
+padding: 5px 10px 4px 0;
 }
 #copyright span {
-  color: #4d4d4d;
+color: #4d4d4d;
 }
 #copyright .copyright-content {
-  display: none;
+display: none;
 }
 
 /* Dialogue */
 #dialogue .msg {
-  margin: 0 0 14px 0;
+margin: 0 0 14px 0;
 }
 #dialogue {
-  padding: 15px 18px 0 22px;
-  height: 192px;
-  overflow: auto;
-  display: none;
+padding: 15px 18px 0 22px;
+height: 192px;
+overflow: auto;
+display: none;
 }
 #dialogue .msg-input .msg-photo {
-  float: left;
+float: left;
 }
 #dialogue .msg-input .msg-content {
-  background: #f7f7f7;
-  padding: 8px 16px 8px 18px;
+background: #f7f7f7;
+padding: 8px 16px 8px 18px;
 }
 #dialogue .msg-input .msg-content-arrow {
-  background: url(../img/msg-input-arrow.png) 0 15px no-repeat;
-  padding: 0 0 0 6px;
-  margin: 0 0 0 52px;
+background: url(../img/msg-input-arrow.png) 0 15px no-repeat;
+padding: 0 0 0 6px;
+margin: 0 0 0 52px;
 }
 #dialogue .msg-input  .msg-content .msg-date {
-  font-size: 10px;
-  color: #acacac;
-  float: right;
-  display: none;
+font-size: 10px;
+color: #acacac;
+float: right;
+display: none;
 }
 #dialogue .msg-input:hover .msg-date {
-  display: block;
+display: block;
 }
 #dialogue .msg-input  .msg-content .msg-user {
-  color: #919191;
-  font-size: 12px;
-  line-height: 100%;
-  margin: 0 0 10px 0;
+color: #919191;
+font-size: 12px;
+line-height: 100%;
+margin: 0 0 10px 0;
 }
 #dialogue .msg-input  .msg-content .msg-text {
-  font-size: 13px;
-  color: #2c2c2c;
+font-size: 13px;
+color: #2c2c2c;
 }
 #dialogue .msg-output .msg-photo {
-  float: right;
+float: right;
 }
 #dialogue .msg-output .msg-content {
-  background: #f0f7e7;
-  padding: 8px 16px 8px 18px;
+background: #f0f7e7;
+padding: 8px 16px 8px 18px;
 }
 #dialogue .msg-output .msg-content-arrow {
-  background: url(../img/msg-output-arrow.png) right 15px no-repeat;
-  padding: 0 6px 0 0;
-  margin: 0 52px 0 0;
+background: url(../img/msg-output-arrow.png) right 15px no-repeat;
+padding: 0 6px 0 0;
+margin: 0 52px 0 0;
 }
 #dialogue .msg-output  .msg-content .msg-date {
-  font-size: 10px;
-  color: #acacac;
-  float: right;
-  display: none;
+font-size: 10px;
+color: #acacac;
+float: right;
+display: none;
 }
 #dialogue .msg-output:hover .msg-date {
-  display: block;
+display: block;
 }
 #dialogue .msg-output  .msg-content .msg-user {
-  color: #84897e;
-  font-size: 12px;
-  line-height: 100%;
-  margin: 0 0 10px 0;
+color: #84897e;
+font-size: 12px;
+line-height: 100%;
+margin: 0 0 10px 0;
 }
 #dialogue .msg-output  .msg-content .msg-text {
-  font-size: 13px;
-  color: #2c2c2c;
+font-size: 13px;
+color: #2c2c2c;
 }
 
 /* Auth */
 #auth {
-  width: 288px;
-  height: 38px;
-  background: url(../img/auth.png) no-repeat;
-  padding: 7px 0 0 7px;
+width: 288px;
+height: 38px;
+background: url(../img/auth.png) no-repeat;
+padding: 7px 0 0 7px;
 }
 #auth input {
-  width: 108px;
-  height: 23px;
-  border: 1px solid #d5d5d5;
-  padding: 0 0 0 8px;
-  color: #000;
+width: 108px;
+height: 23px;
+border: 1px solid #d5d5d5;
+padding: 0 0 0 8px;
+color: #000;
 }
 #auth .form-item {
-  display: inline-block;
-  margin-right: 3px;
+display: inline-block;
+margin-right: 3px;
 }
 #auth button {
-  width: 29px;
-  height: 25px;
-  background: url(../img/auth-button.png) no-repeat;
-  border: none;
-  cursor: pointer;
-  color: #fff;
+width: 29px;
+height: 25px;
+background: url(../img/auth-button.png) no-repeat;
+border: none;
+cursor: pointer;
+color: #fff;
 }
 #auth .form-action {
-  display: inline-block;
+display: inline-block;
 }
 #content #auth {
-  position: absolute;
-  top: 267px;
-  left: 9px;
+position: absolute;
+top: 267px;
+left: 9px;
 }
