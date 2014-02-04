@@ -30,8 +30,21 @@
         $rootScope.lang = lang;
         $translate.uses(lang);
 
-        /** @todo Регистрировать посетителя */
-        socket.emit('visitor:connected', { fullname: 'Guest' });
+        $rootScope.url = document.location.host;
+        // Получаем текущий URL пользователя
+        $rootScope.ref = $cookieStore.get('referrer');
+        // Если текущий URL пользователя не найден - сохраняем его
+        $rootScope.ref || $cookieStore.put('referrer', document.referrer);
+
+/*
+        $cookieStore.remove("token");
+        $cookieStore.remove("cliId");
+        $cookieStore.remove("entId");
+        $cookieStore.remove("me");
+        $cookieStore.remove("messages");
+        $cookieStore.remove("hypertext");
+        $cookieStore.remove("opened")
+*/
     });
 
 })(angular);

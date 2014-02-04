@@ -3,7 +3,7 @@
 
     "server": {
         "port": 5001,
-        "url": "http://my.regidium.com",
+        "url": "http://widget.regidium.com",
         "io_port": 5000,
         "io_url": "http://io.regidium.loc"
     },

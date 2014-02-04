@@ -26,7 +26,7 @@ app.configure(function() {
     app.use(framework.express.cookieSession({ key: config.session.key, secret: config.session.secret, cookie: { maxAge: config.session.max_age * 1000 } }));
     app.use(framework.express.methodOverride());
     app.use(framework.express.static('./public'));
-    app.use(framework.authorizer.check);
+    //app.use(framework.authorizer.check);
     app.use(app.router);
 });
 
@@ -54,7 +54,7 @@ router.init(app);
 var response = require('http').ServerResponse.prototype;
 response.backend = framework.backend;
 response.async = framework.async;
-response.authorizer = framework.authorizer;
+//response.authorizer = framework.authorizer;
 
 server.listen(app.get('port'), function() {
     console.log('Express server listening on port ' + app.get('port'));

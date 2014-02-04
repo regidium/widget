@@ -1,39 +1,34 @@
 <div id="header">
-    <div class="status" translate>Служба поддержки на связи</div>
+    <div class="status" ng-click="switch()" translate>Служба поддержки на связи</div>
 </div>
 <div id="content">
-    <div id="employee">
-        <div class="photo"><img src="{{agent.avatar || 'img/employee-photo.jpg' }}" /></div>
+    <div id="employee" ng-show="{{agent}}">
+        <div class="photo"><img ng-src="{{agent.avatar}}" /></div>
         <div class="name">
             <div class="first-name" ng-bind="agent.fullname">{{agent.fullname}}</div>
             <div class="last-name"></div>
         </div>
-        <div class="post" translate>Сотрудник службы поддержки</div>
+        <div class="post">{{agent.job_title}}</div>
     </div>
     <div id="dialogue">
         <div class="content">
-            <div class="msg" ng-repeat='message in chat.messages;'  ng-class="{'msg-output': message.sender.model_type == 'visitor', 'msg-input': message.sender.model_type == 'agent'}">
-                <img src="{{message.sender.avatar}}" class="msg-photo" />
+            <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{'msg-output': message.sender.model_type == 'user', 'msg-input': message.sender.model_type == 'agent'}">
+                <img ng-src="{{message.sender.person.avatar}}" class="msg-photo" />
                 <div class="msg-content-arrow">
                     <div class="msg-content">
                         <div class="msg-date">{{message.date | date:'shortTime' }}</div>
-                        <div class="msg-user">{{message.sender.fullname}}</div>
+                        <div class="msg-user">{{message.sender.person.fullname}}</div>
                         <div class="msg-text">{{message.text}}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="message-input">
+    <div id="message-input" ng-class="{'full': opened, '': !opened}">
         <div class="message-input-content">
             <textarea ng-model="text" ng-keypress="enter()"></textarea>
-            <span class="info-text" translate>Напишите сообщение и нажмите Enter </span>
+            <span class="info-text" ng-click="focus()" translate>Напишите сообщение и нажмите Enter </span>
         </div>
     </div>
     <div id="copyright"><div class="copyright-content" translate>Powered by <span translate>Regidium</span></div></div>
-<!--    <div id="auth">
-        <div class="form-item"><input type="text" value="Имя" class="name" /></div>
-        <div class="form-item"><input type="text" value="Почта" class="mail" /></div>
-        <div class="form-action"><button onclick="chatAuthReg()">Ok</button></div>
-    </div>-->
 </div>
