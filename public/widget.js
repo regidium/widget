@@ -17,7 +17,7 @@
             uid: 0,
             height: '100%',
             width: '100%',
-            domain: 'widget.regidium.loc',
+            domain: 'widget.regidium.com',
             class: 'regidium_widget_container'
         }, config);
         options.widget_url = [Util.proto, options.domain, '/', options.uid].join('');
