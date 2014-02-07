@@ -17,7 +17,7 @@
             uid: 0,
             height: '100%',
             width: '100%',
-            domain: 'widget.regidium.com',
+            domain: 'widget.regidium.loc',
             class: 'regidium_widget_container'
         }, config);
         options.widget_url = [Util.proto, options.domain, '/', options.uid].join('');
@@ -44,7 +44,6 @@
                 this.widgetElement.setAttribute('id', options.class);
                 this.widgetElement.setAttribute('class', options.class);
                 this.widgetElement.innerHTML = '<iframe id="regidium_widget_iframe" src="' + options.widget_url + '" scrolling="no" width="'+options.width+'" height="'+options.height+'" frameborder="0"></iframe>';
-
                 this.created = true;
 
                 document.body.insertBefore(this.widgetElement, document.body.nextSibling);

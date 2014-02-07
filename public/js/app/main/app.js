@@ -12,8 +12,8 @@
         $locationProvider.html5Mode(true);
 
         $routeProvider
-            .when('/', { templateUrl: 'js/app/main/views/index.html', controller: MainCtrl })
-            .otherwise({ redirectTo: '/' });
+            .when('/:uid', { templateUrl: 'js/app/main/views/index.html', controller: MainCtrl });
+            //.otherwise({ redirectTo: '/:uid' });
 
         $translateProvider.useStaticFilesLoader({
             prefix: 'js/app/main/translations/',

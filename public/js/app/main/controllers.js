@@ -121,9 +121,6 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
         $scope.chat.messages = [];
     }
 
-    // Получаем статус открытости виджета
-    var opened = $cookieStore.get('opened');
-
     // Подключаем аудио файл для звукового оповещания
     var sound = getSound();
 
@@ -212,10 +209,9 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
         var charCode = (evt.which) ? evt.which : evt.keyCode;
         // Если был нажат ENTER
         if (charCode == 13) {
-            //evt.returnValue = false;
+            evt.returnValue = false;
             // Если виджет не открыт, тогда открываем его
-            if (!opened) {
-                $cookieStore.put('opened', true);
+            if (!$cookieStore.get('opened')) {
                 $scope.open();
             }
             // Не отправляем пустое сообщение
@@ -249,13 +245,15 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
             $scope.text = '';
             // Пролистываем до посдеднего сообщения
             scroll_to_bottom();
+
+            return false;
         }
     }
 
     // Раскрытие виджета
     $scope.switch = function() {
         // Если виджет раскрыт, тогда сворачиваем его
-        if (opened) {
+        if ($cookieStore.get('opened')) {
             $scope.close();
         } else {
             $scope.open();
@@ -267,6 +265,7 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
 
     // Разворачиваем видежт
     $scope.open = function() {
+        $cookieStore.put('opened', true);
         $('#dialogue').slideToggle(300);
         $('#message-input').toggleClass('full');
 
@@ -274,19 +273,16 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
         $('#message-input textarea').animate({height: '55px'});
         // Текст в поле
         setTimeout("$('#message-input .message-input-content span').delay(1000).text('Напишите сообщение и нажмите Enter, чтобы его отправить');", 300);
-
-        $cookieStore.put('opened', true);
     }
 
     // Сворачиваем видежт
     $scope.close = function() {
+        $cookieStore.put('opened', false);
         $('#dialogue').slideToggle(300);
         $('#message-input').toggleClass('full');
 
         $('#message-input textarea').animate({height: '15px'});
         $('#message-input .message-input-content span').text('Напишите сообщение и нажмите Enter');
-
-        $cookieStore.put('opened', false);
     }
 
     // Активируем поле ввода сообщения
@@ -302,7 +298,7 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
 
     $(document).ready(function() {
         // Если виджет был развернут до обновления страницы, тогда раскрываем его
-        if (opened) {
+        if ($cookieStore.get('opened')) {
             $scope.open();
             // Прокручиваем виджет к последнему сообщению
             scroll_to_bottom();
