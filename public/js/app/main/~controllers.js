@@ -1,6 +1,6 @@
 'use strict';
 
-function getPerson($cookieStore) {
+function security($cookieStore) {
     var person = $cookieStore.get('person');
     if (person) {
         person.fullname = decodeURIComponent(person.fullname);
@@ -114,7 +114,7 @@ function autorization($scope, $cookieStore, socket, Widgets) {
 function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
     // Ищем пользователя в cookie
     var widget_uid = $cookieStore.get('uid');
-    $scope.person = getPerson($cookieStore);
+    $scope.person = security($cookieStore);
     // Ищем чат в cookie
     $scope.chat = $cookieStore.get('chat');
     if ($scope.chat) {
@@ -134,6 +134,46 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
 
             // Авторизируем пользователя
             autorization($scope, $cookieStore, socket, Widgets);
+/*            var data = {
+                person: $scope.person,
+                widget: widget_uid
+            };
+            socket.emit('user:connected', data);
+
+            // Создаем чат если он не найден в cookie
+            $scope.chat = Widgets.createChat({ uid: widget_uid, user: $scope.person.user.uid }, function(data) {
+                *//** @todo Отдевать с сервера только нужное *//*
+                var chat_data = {
+                    uid: data.uid,
+                    user_status: data.user_status,
+                    operator_status: data.operator_status
+                };
+                // Сохраняем данные чата в cookie
+                $cookieStore.put('chat', chat_data);
+                // Оповещаем о создании чата
+                socket.emit('chat:created', {
+                    widget: widget_uid,
+                    user: $scope.person.user,
+                    chat: $scope.chat
+                });
+
+                *//** Постетитель меняет страницу *//*
+                $scope.$on('$locationChangeStart', function(event) {
+                    console.log('$locationChangeStart', $scope.person.user);
+                    socket.emit('user:refreshed', {
+                        uid: $scope.person.user.uid
+                    });
+                    socket.emit('chat:destroyed', {
+                        widget: widget_uid,
+                        chat: $scope.chat.uid
+                    });
+                });
+            });
+
+            $scope.chat.messages = JSON.parse(sessionStorage.getItem('messages'));
+            if (!$scope.chat.messages) {
+                $scope.chat.messages = [];
+            }*/
         });
     } else {
         // Авторизируем пользователя
@@ -185,18 +225,24 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
                 text: $scope.text
             };
 
-            // Оповещаем об отпраке сообщения
-            socket.emit('user:chat:message:sended', { widget_uid: widget_uid, chat_uid: $scope.chat.uid, sender_uid: $scope.person.uid, text: $scope.text });
+            var message_data_emit = message_data;
+            message_data_emit.widget = widget_uid;
+            message_data_emit.chat = $scope.chat.uid;
 
-            // Записываем сообщения в сессию
-            sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
+            // Сохраняем сообщение в БД
+            Widgets.createChatMessage({}, { uid: widget_uid, chat: $scope.chat.uid, sender: $scope.person.uid, text: $scope.text }, function(data) {
+                // Оповещаем об отпраке сообщения
+                socket.emit('user:chat:message:send', message_data_emit);
+            });
 
             // Добавляем сообщение в список сообщений
             $scope.chat.messages.push(message_data);
 
+            // Записываем сообщения в сессию
+            sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
+
             // Очищаем поле ввода сообщения
             $scope.text = '';
-
             // Пролистываем до посдеднего сообщения
             scroll_to_bottom();
 
