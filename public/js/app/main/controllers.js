@@ -150,6 +150,11 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
     var widget_uid = getWidgetUid($cookieStore);
     // Ищем чат в cookie
     var chat = getChat($cookieStore);
+    // Заполняем переменную сообщений чата
+    chat.chat.messages = getMessages(sessionStorage);
+    if (!chat.chat.messages {
+        chat.chat.messages = [];
+    });
     // Ищем персону пользователя в cookie
     var person = getPerson($cookieStore);
 
@@ -200,8 +205,6 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
         $scope.person = person;
         // Заполняем переменную чат
         $scope.chat = chat;
-        // Заполняем переменную сообщений чата
-        $scope.chat.messages = getMessages(sessionStorage);
         // Заполняем переменную агент
         $scope.agent = chat.agent;
         // Оповещаем о подключении чата
