@@ -152,9 +152,9 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
     var chat = getChat($cookieStore);
     // Заполняем переменную сообщений чата
     chat.chat.messages = getMessages(sessionStorage);
-    if (!chat.chat.messages {
+    if (!chat.chat.messages) {
         chat.chat.messages = [];
-    });
+    }
     // Ищем персону пользователя в cookie
     var person = getPerson($cookieStore);
 
