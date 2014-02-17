@@ -151,9 +151,9 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
     // Ищем чат в cookie
     var chat = getChat($cookieStore);
     // Заполняем переменную сообщений чата
-    chat.chat.messages = getMessages(sessionStorage);
-    if (!chat.chat.messages) {
-        chat.chat.messages = [];
+    chat.messages = getMessages(sessionStorage);
+    if (!chat.messages) {
+        chat.messages = [];
     }
     // Ищем персону пользователя в cookie
     var person = getPerson($cookieStore);
