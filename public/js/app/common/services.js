@@ -4,6 +4,28 @@
 
     /* Services */
     angular.module('regidiumApp')
+        .factory('sound', function () {
+            var sound = document.createElement('audio');
+            var types = {
+                '/sound/chat/chat.ogg': 'audio/ogg; codecs="vorbis"',
+                '/sound/chat/chat.wav': 'audio/wav; codecs="1"',
+                '/sound/chat/chat.mp3': 'audio/mpeg;'
+            };
+
+            var audio_file = '';
+            _.each(types, function(type, file) {
+                var e = sound.canPlayType(type);
+                if ('probably' === e || 'maybe' === e) {
+                    audio_file = file;
+                }
+            });
+
+            if (audio_file) {
+                sound.setAttribute('src', audio_file);
+            }
+
+            return sound;
+        })
         .factory('socket', function ($rootScope) {
             var socket = io.connect($rootScope.config.server.io_url + ':' + $rootScope.config.server.io_port);
             return {

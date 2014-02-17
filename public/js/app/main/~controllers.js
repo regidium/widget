@@ -66,7 +66,7 @@ function autorization($scope, $cookieStore, socket, Widgets) {
         person: $scope.person,
         widget: widget_uid
     };
-    socket.emit('user:connect', data);
+
     // Создаем чат если он не найден в cookie
     if (!$scope.chat) {
         $scope.chat = Widgets.createChat({ uid: widget_uid, user: $scope.person.user.uid }, function(data) {

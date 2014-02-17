@@ -33,17 +33,17 @@
         $rootScope.url = document.location.host;
         // Получаем текущий URL пользователя
         $rootScope.ref = $cookieStore.get('referrer');
-        // Если текущий URL пользователя не найден - сохраняем его
+        // Если текущий URL пользователя не найден - добавляем его
         $rootScope.ref || $cookieStore.put('referrer', document.referrer);
-
 /*
-        $cookieStore.remove("token");
-        $cookieStore.remove("cliId");
-        $cookieStore.remove("entId");
-        $cookieStore.remove("me");
-        $cookieStore.remove("messages");
-        $cookieStore.remove("hypertext");
-        $cookieStore.remove("opened")
+        $cookieStore.remove("token");    * widget_uid
+        $cookieStore.remove("me");       * person
+        $cookieStore.remove("messages"); * messages
+        $cookieStore.remove("opened")    * opened
+
+        $cookieStore.remove("cliId");     ?
+        $cookieStore.remove("entId");     ?
+        $cookieStore.remove("hypertext"); ?
 */
     });
 

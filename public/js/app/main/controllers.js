@@ -1,5 +1,17 @@
 'use strict';
 
+/**
+ * Получение UID виджета из cookie
+ * @param $cookieStore
+ */
+function getWidgetUid($cookieStore) {
+    return $cookieStore.get('widget_uid');
+}
+
+/**
+ * Получение данных персоны пользователя из cookie
+ * @param $cookieStore
+ */
 function getPerson($cookieStore) {
     var person = $cookieStore.get('person');
     if (person) {
@@ -9,6 +21,68 @@ function getPerson($cookieStore) {
     return false;
 }
 
+/**
+ * Установка данных персоны пользователя в cookie
+ * @param        $cookieStore
+ * @param Object data
+ */
+function setPerson($cookieStore, data) {
+    return $cookieStore.put('person', data);
+}
+
+/**
+ * Получение данных чата из cookie
+ * @param $cookieStore
+ */
+function getChat($cookieStore) {
+    return $cookieStore.get('chat');
+}
+
+/**
+ * Установка данных чата в cookie
+ * @param $cookieStore
+ * @param data
+ */
+function setChat($cookieStore, data) {
+    return $cookieStore.put('chat', data);
+}
+
+/**
+ * Получение сообщений чата из sessionStorage
+ * @param sessionStorage
+ *
+ * @return array
+ */
+function getMessages(sessionStorage) {
+    var messages = sessionStorage.getItem('messages');
+
+    try {
+        return JSON.parse(messages);
+    } catch(e) {
+        return [];
+    }
+}
+
+/**
+ * Установка сообщений чата в sessionStorage
+ * @param sessionStorage
+ * @param messages
+ */
+function setMessages(sessionStorage, messages) {
+    sessionStorage.setItem('messages', JSON.stringify(messages));
+}
+
+/**
+ * Проверка открытости чата
+ * @param $cookieStore
+ */
+function isOpened($cookieStore) {
+    return $cookieStore.get('opened')
+}
+
+/**
+ * Загрузка звука для уведомления
+ */
 function getSound() {
     var sound = document.createElement('audio');
     var types = {
@@ -31,168 +105,220 @@ function getSound() {
     return sound;
 }
 
-function registration($rootScope, $cookieStore, Widgets, cb) {
-    // Получаем данные пользователя
-    var data = {};
-    data.fullname = 'Client';
-    data.device = UAParser('').device.model + ' ' + UAParser('').device.vendor;
-    data.os = UAParser('').os.name;
-    data.browser = UAParser('').browser.name + ' ' + UAParser('').browser.version;
-    data.language = $rootScope.lang;
-
-    // Сохраняем пользователя
-    Widgets.saveUser({ uid: $cookieStore.get('uid'), user: 'new' }, function(data) {
-        /** @todo Обработать ошибку */
-        if (data && data.error) {
-            cb(null);
-        } else {
-            /** @todo Отдавать с сервера только необходимое */
-            delete(data.auths);
-            if (data.user) {
-                if (data.user.chats) {
-                    delete(data.user.chats);
-                }
-                delete(data.user.widget);
-            }
-            $cookieStore.put('person', data);
-            cb(data);
-        }
-    });
+/**
+ * Скрытие виджета
+ */
+function widgetHide() {
+    document.body.style.display = 'none';
 }
 
-function autorization($scope, $cookieStore, socket, Widgets) {
-    var widget_uid = $cookieStore.get('uid');
-    var data = {
-        person: $scope.person,
-        widget: widget_uid
-    };
-    socket.emit('user:connect', data);
-    // Создаем чат если он не найден в cookie
-    if (!$scope.chat) {
-        $scope.chat = Widgets.createChat({ uid: widget_uid, user: $scope.person.user.uid }, function(data) {
-            // Оповещаем о создании чата
-            $cookieStore.put('chat', data);
-            console.log('chat:created', $scope.chat);
-            socket.emit('chat:created', {
-                widget: widget_uid,
-                user: $scope.person,
-                chat: $scope.chat
-            });
+/**
+ * Отображение виджета
+ */
+function widgetShow() {
+    document.body.style.display = 'block';
+}
 
-            /** Постетитель меняет страницу */
-            $scope.$on('$locationChangeStart', function(event) {
-                console.log('$locationChangeStart', $scope.person.user);
-                socket.emit('user:refreshed', {
-                    uid: $scope.person.user.uid
-                });
-                socket.emit('chat:destroyed', {
-                    widget: widget_uid,
-                    uid: $scope.chat.uid
-                });
-            });
-        });
-    } else {
-        socket.emit('chat:started', {
-            widget: widget_uid,
-            user: $scope.person,
-            chat: $scope.chat
-        });
-    }
-    //$scope.chat.messages = JSON.parse(sessionStorage.getItem('messages'));
-    $scope.chat.messages = JSON.parse(sessionStorage.getItem('messages'));
-    if (!$scope.chat.messages) {
-        $scope.chat.messages = [];
-    }
+/**
+ * Создание нового чата
+ */
+function createChat($rootScope, $cookieStore, socket) {
+    // Получаем UID виджета
+    var widget_uid = getWidgetUid($cookieStore);
+    // Создаем данные пользователя
+    var user_data = {};
+    user_data.fullname = 'Client';
+    user_data.device = UAParser('').device.model + ' ' + UAParser('').device.vendor;
+    user_data.os = UAParser('').os.name;
+    user_data.browser = UAParser('').browser.name + ' ' + UAParser('').browser.version;
+    user_data.language = $rootScope.lang;
+
+    // Оповещаем о необходимости создать чат и пользователя
+    socket.emit('chat:create', {
+        widget_uid: widget_uid,
+        user_data: user_data
+    });
 }
 
 /**
  * @url "/widget"
- * @todo REFACTORING!!!!
- * @todo Сохранять чат в cookie
- * @todo Сохранять пользователя в cookie
  */
-function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
-    // Ищем пользователя в cookie
-    var widget_uid = $cookieStore.get('uid');
-    $scope.person = getPerson($cookieStore);
+function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
+    // Скрываем виджет
+    widgetHide();
+    // Получаем UID виджета
+    var widget_uid = getWidgetUid($cookieStore);
     // Ищем чат в cookie
-    $scope.chat = $cookieStore.get('chat');
-    if ($scope.chat) {
-        $scope.chat.messages = [];
-    }
+    var chat = getChat($cookieStore);
+    // Ищем персону пользователя в cookie
+    var person = getPerson($cookieStore);
 
-    // Подключаем аудио файл для звукового оповещания
-    var sound = getSound();
+    // Получаем информацию о виджете
+    Widgets.one({ uid: widget_uid }, function(data) {
+        $scope.settings = data.settings;
+    });
 
-    // Очищаем поле ввода сообщения
+    // Резервируем в $scope переменную text
     $scope.text = '';
 
-    // Создаем пользователя если он не найден в cookie
-    if (!$scope.person) {
-        registration($rootScope, $cookieStore, Widgets, function(person) {
-            $scope.person = person;
+    if (!chat || !person) {
+        // Если чат или пользователь не найдены в cookie - создаем их
+        createChat($rootScope, $cookieStore, socket);
 
-            // Авторизируем пользователя
-            autorization($scope, $cookieStore, socket, Widgets);
+        /**
+         * Ждем оповещания о создании чата
+         * @param Object data = {
+         *       Object personuser:disconnect
+         *       Object chat
+         *       string widget_uid
+         *   }
+         */
+        socket.on('chat:created', function (data) {
+            console.log('Socket chat:created');
+
+            // Оповещаем о подключении чата
+            socket.emit('chat:connected', {
+                chat_uid: data.chat.uid
+            });
+            // Заполняем переменную персона пользователь
+            $scope.person = data.person;
+            // Добавляем персону пользователя в cookie
+            setPerson($cookieStore, data.person);
+            // Заполняем переменную чат
+            $scope.chat = data.chat;
+            // Добавляем чат в cookie
+            setChat($cookieStore, data.chat);
+            $scope.chat.messages = [];
+            // Отображаем виджет
+            widgetShow();
         });
     } else {
-        // Авторизируем пользователя
-        autorization($scope, $cookieStore, socket, Widgets);
+        if (!chat.messages) {
+            chat.messages = [];
+        }
+        // Заполняем переменную персона пользователь
+        $scope.person = person;
+        // Заполняем переменную чат
+        $scope.chat = chat;
+        // Заполняем переменную сообщений чата
+        $scope.chat.messages = getMessages(sessionStorage);
+        // Заполняем переменную агент
+        $scope.agent = chat.agent;
+        // Оповещаем о подключении чата
+        socket.emit('chat:connect', {
+            person: person,
+            chat: chat,
+            widget_uid: widget_uid
+        });
+        // Отображаем виджет
+        widgetShow();
     }
 
+    /**
+     * Агент подключился к чату
+     * @param Object data = {
+     *       Object person
+     *       string chat_uid
+     *       string widget_uid
+     *   }
+     */
     socket.on('chat:agent:enter', function (data) {
-        console.log('chat:agent:enter', data);
-        $scope.agent = data.agent;
+        console.log('Socket chat:agent:enter');
+
+        // Фильтруем лишнее
+        if ($scope.chat.uid == data.chat_uid) {
+            // Заполняем переменную agent в $scope
+            $scope.agent = data.person;
+        }
     });
 
-    // Агент прислал сообщение
-    socket.on('chat:agent:message:send', function (data) {
-        console.log('chat:agent:message:send', data);
-        // Воспроизводим звуковое оповещение
-        sound.play();
+    /**
+     * @todo Проверить необходиость
+     * Пользователь меняет страницу
+     */
+    $scope.$on('$locationChangeStart', function(event) {
+        console.log('AngularJS $locationChangeStart');
 
-        // Добавляем сообщение в список сообщений
-        $scope.chat.messages.push({
-            date: data.date,
-            sender: data.sender,
-            text: data.text
+        socket.emit('user:page:change', {
+            person_uid: $scope.person.user.uid,
+            chat_uid: $scope.chat.uid,
+            widget_uid: widget_uid
         });
-
-        // Пролистываем до последнего сообщения
-        scroll_to_bottom();
     });
 
-    // нажатие клавиш в поле ввода сообщения
+    /**
+     * Агент прислал сообщение
+     * @param Object data = {
+     *       Object person
+     *       int    date
+     *       string text
+     *   }
+     */
+    socket.on('chat:message:send:agent', function (data) {
+        console.log('Socket chat:message:send:agent');
+
+        // Убираем лишние
+        if (data.chat_uid == $scope.chat.uid) {
+            // Воспроизводим звуковое оповещение
+            sound.play();
+
+            // Если виджет не открыт, тогда открываем его
+            if (!isOpened($cookieStore)) {
+                $scope.open();
+            }
+
+            // Добавляем сообщение в список сообщений
+            $scope.chat.messages.push({
+                date: data.date,
+                person: data.person,
+                text: data.text
+            });
+
+            // Записываем сообщения в сессию
+            setMessages(sessionStorage, $scope.chat.messages);
+
+            // Пролистываем до последнего сообщения
+            scroll_to_bottom();
+        }
+    });
+
+    // Нажатие клавиш в поле ввода сообщения
     $scope.enter = function(evt) {
         // Получаем событие нажатия
         evt = (evt) ? evt : window.event;
         var charCode = (evt.which) ? evt.which : evt.keyCode;
-        // Если был нажат ENTER
+        // Если нажат ENTER
         if (charCode == 13) {
-            evt.returnValue = false;
+            // Блокируем всплытие
+            event.preventDefault()
             // Если виджет не открыт, тогда открываем его
-            if (!$cookieStore.get('opened')) {
+            if (!isOpened($cookieStore)) {
                 $scope.open();
             }
-            // Не отправляем пустое сообщение
+
+            // Блокируем отправку пустых сообщений
             if ($scope.text.length == 0) {
                 return false;
             };
 
-            var message_data = {
+            // Оповещаем об отправке сообщения
+            socket.emit('chat:message:send:user', {
+                widget_uid: widget_uid,
+                chat_uid: $scope.chat.uid,
+                person: $scope.person,
                 date: new Date(),
-                sender: $scope.person.user,
                 text: $scope.text
-            };
-
-            // Оповещаем об отпраке сообщения
-            socket.emit('user:chat:message:sended', { widget_uid: widget_uid, chat_uid: $scope.chat.uid, sender_uid: $scope.person.uid, text: $scope.text });
-
-            // Записываем сообщения в сессию
-            sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
+            });
 
             // Добавляем сообщение в список сообщений
-            $scope.chat.messages.push(message_data);
+            $scope.chat.messages.push({
+                person: $scope.person,
+                date: new Date(),
+                text: $scope.text
+            });
+
+            // Записываем сообщения в сессию
+            setMessages(sessionStorage, $scope.chat.messages);
 
             // Очищаем поле ввода сообщения
             $scope.text = '';
@@ -203,6 +329,8 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
             return false;
         }
     }
+
+    /** @todo REFFACTORING!!! */
 
     // Раскрытие виджета
     $scope.switch = function() {
@@ -258,4 +386,5 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, Widgets) {
             scroll_to_bottom();
         }
     })
+
 }

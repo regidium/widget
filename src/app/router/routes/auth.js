@@ -26,7 +26,7 @@ module.exports.registration = function (req, res) {
             data.ip = req.ips.reverse()[0];
 
             res.backend.post({
-                path: 'widgets/'+req.params.uid+'/users',
+                path: 'widgets/'+req.params.widget_uid+'/users',
                 data: data,
                 onSuccess: function (body) {
                     callback(null, body);

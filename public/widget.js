@@ -17,9 +17,10 @@
             uid: 0,
             height: '100%',
             width: '100%',
-            domain: 'widget.regidium.com',
+            domain: 'widget.regidium.loc',
             class: 'regidium_widget_container'
         }, config);
+        // Заполняем параметры
         options.widget_url = [Util.proto, options.domain, '/', options.uid].join('');
         options.widget_url += '#' + encodeURIComponent(document.location.href);
 
@@ -31,8 +32,11 @@
                     return cb(this.widgetElement);
                 }
 
+                // Создаем блок виджета
                 this.widgetElement = document.createElement('div');
+                // Скрываем блок виджета
                 this.widgetElement.style.display = 'none';
+                // Стилизуем блок виджета
                 this.widgetElement.style.position = 'absolute';
                 this.widgetElement.style.minHeight = '186px';
                 this.widgetElement.style.maxHeight = '450px';
@@ -43,10 +47,13 @@
                 this.widgetElement.style.zIndex = '2147483646';
                 this.widgetElement.setAttribute('id', options.class);
                 this.widgetElement.setAttribute('class', options.class);
+                // Подключаем iframe к блоку виджета
                 this.widgetElement.innerHTML = '<iframe id="regidium_widget_iframe" src="' + options.widget_url + '" scrolling="no" width="'+options.width+'" height="'+options.height+'" frameborder="0"></iframe>';
                 this.created = true;
 
+                // Подключаем блок виджета к странице
                 document.body.insertBefore(this.widgetElement, document.body.nextSibling);
+                // Показываем блок виджета
                 Widget.show();
             },
             show: function() {
@@ -57,5 +64,6 @@
         Widget.create();
     }
 
+    // Создаем виджет
     createWidget(widgetOptions);
 })();

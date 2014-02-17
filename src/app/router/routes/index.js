@@ -1,8 +1,8 @@
 module.exports.index = function (req, res) {
-    /** @todo Проверять доступность создания виджета (uid + url) */
+    /** @todo Проверять доступность создания виджета (widget_uid + url) */
     // Устанавливаем UID виджета в cookie
-    if (typeof res.cookie.uid === 'undefined' && req.params.uid) {
-        res.cookie('uid', JSON.stringify(req.params.uid));
+    if (typeof res.cookie.widget_uid === 'undefined' && req.params.widget_uid) {
+        res.cookie('widget_uid', JSON.stringify(req.params.widget_uid));
     }
 
     return res.render('main/index');
