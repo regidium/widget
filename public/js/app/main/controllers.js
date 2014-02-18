@@ -122,7 +122,7 @@ function widgetShow() {
 /**
  * Создание нового чата
  */
-function createChat($rootScope, $cookieStore, socket) {
+function createChat($rootScope, $http, $cookieStore, socket) {
     // Получаем UID виджета
     var widget_uid = getWidgetUid($cookieStore);
     // Создаем данные пользователя
@@ -132,6 +132,14 @@ function createChat($rootScope, $cookieStore, socket) {
     user_data.os = UAParser('').os.name;
     user_data.browser = UAParser('').browser.name + ' ' + UAParser('').browser.version;
     user_data.language = $rootScope.lang;
+    // Функция 
+    user_data.country = geoip_country_name();
+    user_data.city = geoip_city();
+    // Определяем IP пользователя
+    $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
+        user_data.ip = data.ip;
+        console.log(user_data);
+    });
 
     // Оповещаем о необходимости создать чат и пользователя
     socket.emit('chat:create', {
@@ -143,7 +151,7 @@ function createChat($rootScope, $cookieStore, socket) {
 /**
  * @url "/widget"
  */
-function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
+function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widgets) {
     // Скрываем виджет
     widgetHide();
     // Получаем UID виджета
@@ -151,10 +159,15 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
     // Ищем чат в cookie
     var chat = getChat($cookieStore);
     // Заполняем переменную сообщений чата
+    if (!chat) {
+        chat = {};
+    }
+
     chat.messages = getMessages(sessionStorage);
     if (!chat.messages) {
         chat.messages = [];
     }
+
     // Ищем персону пользователя в cookie
     var person = getPerson($cookieStore);
 
@@ -166,9 +179,9 @@ function MainCtrl($rootScope, $scope, $cookieStore, socket, sound, Widgets) {
     // Резервируем в $scope переменную text
     $scope.text = '';
 
-    if (!chat || !person) {
+    if (!chat.uid || !person) {
         // Если чат или пользователь не найдены в cookie - создаем их
-        createChat($rootScope, $cookieStore, socket);
+        createChat($rootScope, $http, $cookieStore, socket);
 
         /**
          * Ждем оповещания о создании чата
