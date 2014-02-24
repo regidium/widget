@@ -243,6 +243,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
 
         // Фильтруем лишнее
         if ($scope.chat.uid == data.chat_uid) {
+            // Если виджет не открыт, тогда открываем его
+            if (!isOpened($cookieStore)) {
+                $scope.open();
+            }
+
             // Заполняем переменную agent в $scope
             $scope.agent = data.person;
         }
@@ -254,6 +259,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
      */
     $scope.$on('$locationChangeStart', function(event) {
         console.log('AngularJS $locationChangeStart');
+
+        // Если виджет не открыт, тогда открываем его
+        if (!isOpened($cookieStore)) {
+            $scope.open();
+        }
 
         socket.emit('user:page:change', {
             person_uid: $scope.person.user.uid,
