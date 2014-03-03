@@ -138,7 +138,6 @@ function createChat($rootScope, $http, $cookieStore, socket) {
     // Определяем IP пользователя
     $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
         user_data.ip = data.ip;
-        console.log(user_data);
     });
 
     // Оповещаем о необходимости создать чат и пользователя

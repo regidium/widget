@@ -60,7 +60,7 @@ self.flush_object_data = function (obj, cb) {
         },
 
         function (data, callback) {
-            if (data && data.model_type == 'person') {
+            if (data && data.uid) {
                 obj.person = data;
                 delete obj.object_id;
             } else {

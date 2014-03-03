@@ -2,7 +2,7 @@ module.exports.registration = function (req, res) {
     res.async.waterfall([
 
         function (callback) {
-            if (req.person && req.person.model_type == 'person') {
+            if (req.person && req.person.uid) {
                 return res.send('ERROR');
                 //return res.redirect('/');
             }
@@ -41,7 +41,7 @@ module.exports.registration = function (req, res) {
         }
 
     ], function (err, data) {
-        if (data && data.model_type == 'person') {
+        if (data && data.uid) {
             res.authorizer.login(res, data, req.body.remember);
             if (req.headers['xhr']) {
                 res.send(data);

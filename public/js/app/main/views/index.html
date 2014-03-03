@@ -13,7 +13,7 @@
         </div>
         <div id="dialogue">
             <div class="content">
-                <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{'msg-output': message.person.user_uid, 'msg-input': message.person.agent }">
+                <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{'msg-output': message.person.user, 'msg-input': message.person.agent }">
                     <img ng-src="{{message.person.avatar || '/img/user-photo-default.jpg'}}" class="msg-photo" width="53px" />
                     <div class="msg-content-arrow">
                         <div class="msg-content">
