@@ -172,6 +172,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
 
     // Получаем информацию о виджете
     Widgets.one({ uid: widget_uid }, function(data) {
+        $scope.triggers = data.triggers;
         $scope.settings = data.settings;
     });
 
@@ -192,6 +193,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
          */
         socket.on('chat:created', function (data) {
             console.log('Socket chat:created');
+
+            if ()
 
             // Оповещаем о подключении чата
             socket.emit('chat:connected', {
@@ -370,7 +373,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         $('#copyright .copyright-content').slideToggle(300);
     }
 
-    // Разворачиваем видежт
+    // Разворачиваем виджет
     $scope.open = function() {
         $cookieStore.put('opened', true);
         $('#dialogue').slideToggle(300);
@@ -382,7 +385,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         setTimeout("$('#message-input .message-input-content span').delay(1000).text('Напишите сообщение и нажмите Enter, чтобы его отправить');", 300);
     }
 
-    // Сворачиваем видежт
+    // Сворачиваем виджет
     $scope.close = function() {
         $cookieStore.put('opened', false);
         $('#dialogue').slideToggle(300);
