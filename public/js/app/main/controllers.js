@@ -1,5 +1,21 @@
 'use strict';
 
+var EVENT_WIDGET_CREATED = 1;
+var EVENT_WORD_SEND = 2;
+var EVENT_TIME_ONE_PAGE = 3;
+var EVENT_VISIT_PAGE = 4;
+var EVENT_VISIT_FROM_URL = 5;
+var EVENT_VISIT_FROM_KEY_WORD = 6;
+var EVENT_CHAT_OPENED = 7;
+var EVENT_CHAT_CLOSED = 8;
+var EVENT_MESSAGE_START = 9;
+var EVENT_MESSAGE_SEND = 10;
+
+var RESULT_MESSAGE_SEND = 1;
+var RESULT_OPERATORS_ALERT = 2;
+var RESULT_WIDGET_OPEN = 3;
+var RESULT_WIDGET_BELL = 4;
+
 /**
  * Получение UID виджета из cookie
  * @param $cookieStore
@@ -73,39 +89,6 @@ function setMessages(sessionStorage, messages) {
 }
 
 /**
- * Проверка открытости чата
- * @param $cookieStore
- */
-function isOpened($cookieStore) {
-    return $cookieStore.get('opened')
-}
-
-/**
- * Загрузка звука для уведомления
- */
-function getSound() {
-    var sound = document.createElement('audio');
-    var types = {
-        '/sound/chat/chat.ogg': 'audio/ogg; codecs="vorbis"',
-        '/sound/chat/chat.wav': 'audio/wav; codecs="1"',
-        '/sound/chat/chat.mp3': 'audio/mpeg;'
-    };
-
-    var audio_file = _.each(types, function(type, file) {
-        var e = sound.canPlayType(type);
-        if ('probably' === e || 'maybe' === e) {
-            return file;
-        }
-    });
-
-    if (audio_file) {
-        sound.setAttribute('src', audio_file);
-    }
-
-    return sound;
-}
-
-/**
  * Скрытие виджета
  */
 function widgetHide() {
@@ -117,6 +100,47 @@ function widgetHide() {
  */
 function widgetShow() {
     document.body.style.display = 'block';
+}
+
+/**
+ * Проверяем и воспроизводим триггер
+ */
+function checkTrigger(self, name, soundBell, options) {
+
+    if (self.triggers && self.triggers[name]) {
+        console.log('Enabled Triger');
+
+        var triger = self.triggers[name];
+        if (triger.result == RESULT_MESSAGE_SEND) {
+
+            // @todo использовать метод
+            // @todo присваивать отправителя
+            // Добавляем сообщение в список сообщений
+            self.chat.messages.push({
+                date: new Date(),
+                person: {agent: {}},
+                text: triger.result_params
+            });
+
+            // Записываем сообщения в сессию
+            //setMessages(sessionStorage, $scope.chat.messages);
+
+            // Пролистываем до последнего сообщения
+            //scroll_to_bottom();
+
+        } else if (triger.result == RESULT_OPERATORS_ALERT) {
+            // @todo
+            console.log('Оповещаем агентов');
+        } else if (triger.result == RESULT_WIDGET_OPEN) {
+            // @Todo
+            if (!self.isOpened()) {
+                self.open();
+            }
+        } else if (triger.result == RESULT_WIDGET_BELL) {
+            // @Todo
+            self.widgetBell();
+        }
+    }
 }
 
 /**
@@ -151,6 +175,9 @@ function createChat($rootScope, $http, $cookieStore, socket) {
  * @url "/widget"
  */
 function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widgets) {
+    var soundChat = sound.init('chat');
+    var soundBell = sound.init('bell');
+
     // Скрываем виджет
     widgetHide();
     // Получаем UID виджета
@@ -172,8 +199,17 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
 
     // Получаем информацию о виджете
     Widgets.one({ uid: widget_uid }, function(data) {
-        $scope.triggers = data.triggers;
+        $scope.triggers = {};
+
+        if (data.triggers) {
+            _.each(data.triggers, function(trigger) {
+                $scope.triggers[trigger.event] = trigger;
+            });
+        }
         $scope.settings = data.settings;
+
+        // Отображаем виджет
+        widgetShow();
     });
 
     // Резервируем в $scope переменную text
@@ -194,7 +230,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         socket.on('chat:created', function (data) {
             console.log('Socket chat:created');
 
-            if ()
+            checkTrigger(this, EVENT_WIDGET_CREATED, soundBell);
 
             // Оповещаем о подключении чата
             socket.emit('chat:connected', {
@@ -209,8 +245,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
             // Добавляем чат в cookie
             setChat($cookieStore, data.chat);
             $scope.chat.messages = [];
-            // Отображаем виджет
-            widgetShow();
         });
     } else {
         if (!chat.messages) {
@@ -228,8 +262,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
             chat: chat,
             widget_uid: widget_uid
         });
-        // Отображаем виджет
-        widgetShow();
     }
 
     /**
@@ -246,7 +278,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         // Фильтруем лишнее
         if ($scope.chat.uid == data.chat_uid) {
             // Если виджет не открыт, тогда открываем его
-            if (!isOpened($cookieStore)) {
+            if (!$scope.isOpened()) {
                 $scope.open();
             }
 
@@ -263,7 +295,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         console.log('AngularJS $locationChangeStart');
 
         // Если виджет не открыт, тогда открываем его
-        if (!isOpened($cookieStore)) {
+        if (!$scope.isOpened()) {
             $scope.open();
         }
 
@@ -288,13 +320,14 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         // Убираем лишние
         if (data.chat_uid == $scope.chat.uid) {
             // Воспроизводим звуковое оповещение
-            sound.play();
+            soundChat.play();
 
             // Если виджет не открыт, тогда открываем его
-            if (!isOpened($cookieStore)) {
+            if (!$scope.isOpened()) {
                 $scope.open();
             }
 
+            // @todo Вынести в метод
             // Добавляем сообщение в список сообщений
             $scope.chat.messages.push({
                 date: data.date,
@@ -315,12 +348,14 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         // Получаем событие нажатия
         evt = (evt) ? evt : window.event;
         var charCode = (evt.which) ? evt.which : evt.keyCode;
+        // Обрботка триггера
+        checkTrigger(this, EVENT_MESSAGE_START, soundBell, {message: $scope.text});
         // Если нажат ENTER
         if (charCode == 13) {
             // Блокируем всплытие
             event.preventDefault()
             // Если виджет не открыт, тогда открываем его
-            if (!isOpened($cookieStore)) {
+            if (!$scope.isOpened()) {
                 $scope.open();
             }
 
@@ -328,6 +363,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
             if ($scope.text.length == 0) {
                 return false;
             };
+
+            // Обрботка триггера
+            checkTrigger(this, EVENT_WORD_SEND, soundBell, {message: $scope.text});
+            // Обрботка триггера
+            checkTrigger(this, EVENT_MESSAGE_SEND, soundBell, {message: $scope.text});
 
             // Оповещаем об отправке сообщения
             socket.emit('chat:message:send:user', {
@@ -360,7 +400,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
 
     /** @todo REFFACTORING!!! */
 
-    // Раскрытие виджета
+    // Переключение режима виджета
     $scope.switch = function() {
         // Если виджет раскрыт, тогда сворачиваем его
         if ($cookieStore.get('opened')) {
@@ -375,6 +415,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
 
     // Разворачиваем виджет
     $scope.open = function() {
+
+        if (!$cookieStore.get('opened')) {
+            checkTrigger(this, EVENT_CHAT_OPENED, soundBell);
+        }
+
         $cookieStore.put('opened', true);
         $('#dialogue').slideToggle(300);
         $('#message-input').toggleClass('full');
@@ -387,12 +432,41 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
 
     // Сворачиваем виджет
     $scope.close = function() {
+
+        if ($cookieStore.get('opened')) {
+            checkTrigger(this, EVENT_CHAT_CLOSED, soundBell);
+        }
+
         $cookieStore.put('opened', false);
         $('#dialogue').slideToggle(300);
         $('#message-input').toggleClass('full');
 
         $('#message-input textarea').animate({height: '15px'});
         $('#message-input .message-input-content span').text('Напишите сообщение и нажмите Enter');
+    }
+
+    // Анимируем виджет
+    $scope.widgetBell = function() {
+        $('#container')
+            .delay(500)
+            .animate({marginLeft: "-5px"}, 80)
+            .animate({marginLeft: "5px"}, 80)
+            .animate({marginLeft: "-5px"}, 80)
+            .animate({marginLeft: "5px"}, 80)
+            .animate({marginLeft: "-5px"}, 80)
+            .animate({marginLeft: "0px"}, 80)
+    }
+
+    // Анимируем сообщения виджета
+    $scope.widgetMessageBell = function() {
+        $('#dialogue .msg-content-arrow')
+            .delay(500)
+            .animate({marginRight: "-5px"}, 80)
+            .animate({marginRight: "5px"}, 80)
+            .animate({marginRight: "-5px"}, 80)
+            .animate({marginRight: "5px"}, 80)
+            .animate({marginRight: "-5px"}, 80)
+            .animate({marginRight: "0px"}, 80)
     }
 
     // Активируем поле ввода сообщения
@@ -404,6 +478,13 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
     // Прокрутка чата вниз
     function scroll_to_bottom() {
         $('#dialogue').animate({'scrollTop': $('#dialogue .content').height()}, 200);
+    }
+
+    /**
+     * Проверка открытости чата
+     */
+    $scope.isOpened = function () {
+        return $cookieStore.get('opened')
     }
 
     $(document).ready(function() {

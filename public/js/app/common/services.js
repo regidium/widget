@@ -5,26 +5,31 @@
     /* Services */
     angular.module('regidiumApp')
         .factory('sound', function () {
-            var sound = document.createElement('audio');
-            var types = {
-                '/sound/chat/chat.ogg': 'audio/ogg; codecs="vorbis"',
-                '/sound/chat/chat.wav': 'audio/wav; codecs="1"',
-                '/sound/chat/chat.mp3': 'audio/mpeg;'
-            };
+            return {
+                init: function(name) {
+                    var sound = document.createElement('audio');
 
-            var audio_file = '';
-            _.each(types, function(type, file) {
-                var e = sound.canPlayType(type);
-                if ('probably' === e || 'maybe' === e) {
-                    audio_file = file;
+                    var types = [
+                        {type: 'audio/ogg; codecs="vorbis"', file: '/sound/' + name + '.ogg'},
+                        {type: 'audio/wav; codecs="1"', file: '/sound/' + name + '.wav'},
+                        {type: 'audio/mpeg;', file: '/sound/' + name + '.mp3'}
+                    ];
+
+                    var audio_file = '';
+                    _.each(types, function(type) {
+                        var e = sound.canPlayType(type.type);
+                        if ('probably' === e || 'maybe' === e) {
+                            audio_file = type.file;
+                        }
+                    });
+
+                    if (audio_file) {
+                        sound.setAttribute('src', audio_file);
+                    }
+
+                    return sound;
                 }
-            });
-
-            if (audio_file) {
-                sound.setAttribute('src', audio_file);
-            }
-
-            return sound;
+            };
         })
         .factory('socket', function ($rootScope) {
             var socket = io.connect($rootScope.config.server.io_url + ':' + $rootScope.config.server.io_port);
