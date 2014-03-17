@@ -1,16 +1,18 @@
-<div id="container">
+<div id="container" ng-class="{'open': isOpened}">
     <div id="header" ng-style="{ 'background-color': settings.header_color }">
         <div class="status" ng-click="switch()" translate>Служба поддержки на связи</div>
     </div>
     <div id="content">
-        <div id="employee" ng-show="agent">
-            <div class="logo"></div>
-            <div class="photo"><img ng-src="{{agent.avatar}}" /></div>
-            <div class="name">
-                <div class="first-name" ng-bind="agent.fullname">{{agent.fullname}}</div>
-                <div class="last-name"></div>
+        <div id="employee">
+            <div ng-show="agent">
+                <div class="logo"></div>
+                <div class="photo"><img ng-src="{{agent.avatar}}" /></div>
+                <div class="name">
+                    <div class="first-name" ng-bind="agent.fullname">{{agent.fullname}}</div>
+                    <div class="last-name"></div>
+                </div>
+                <div class="post">{{agent.agent.job_title}}</div>
             </div>
-            <div class="post">{{agent.agent.job_title}}</div>
         </div>
         <div id="dialogue">
             <div class="content">
@@ -30,14 +32,14 @@
                 </div>
             </div>
         </div>
-        <div id="message-input" ng-class="{'full': opened, '': !opened}">
+        <div id="message-input" ng-class="{'full': isOpened}">
             <div class="message-input-content">
                 <textarea ng-model="text" ng-keyup="enter()"></textarea>
-                <span class="info-text" ng-click="focus()" translate>Напишите сообщение и нажмите Enter </span>
+                <span class="info-text" ng-click="focus()" ng-bind="input_description" translate></span>
             </div>
             <div class="message-input-content-bg"></div>
         </div>
-        <div id="auth" style="display: none;">
+        <div id="auth">
             <div class="form-item">
                 <input type="text" placeholder="Имя" class="auth.name" />
             </div>
