@@ -17,7 +17,7 @@
             uid: 0,
             height: '100%',
             width: '100%',
-            domain: 'widget.regidium.com',
+            domain: 'widget.regidium.loc',
             class: 'regidium_widget_container'
         }, config);
         // Заполняем параметры
