@@ -41,7 +41,7 @@
                 this.widgetElement.style.minHeight = '35px';
                 this.widgetElement.style.maxHeight = '404px';
                 this.widgetElement.style.height = '100%';
-                this.widgetElement.style.width = '312px';
+                this.widgetElement.style.width = '318px';
                 this.widgetElement.style.bottom = '0';
                 this.widgetElement.style.right = '0';
                 this.widgetElement.style.overflow = 'hidden';

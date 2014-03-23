@@ -337,6 +337,12 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
     // Разворачиваем виджет
     $scope.open = function() {
 
+        // Оповещаем сервер об открытии чата
+        socket.emit('chat:open', {
+            chat_uid: $scope.chat.uid,
+            widget_uid: widget_uid
+        });
+
         if (!$scope.isOpened()) {
             checkTrigger(EVENT_CHAT_OPENED);
         }
@@ -376,6 +382,19 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         if ($('.message-input-content-bg').css('display') !== 'block') {
             $('.message-input-content-bg').fadeIn(300);
         }
+    }
+
+    // Авторизация
+    $scope.auth = function() {
+        // Анимация формы авторизации
+        $('#auth').fadeOut(300);
+        $scope.person.fullname = $scope.auth.fullname;
+        $scope.person.email = $scope.auth.email;
+
+        socket.emit('user:auth:enter', {
+            person: $scope.person,
+            widget_uid: widget_uid
+        });
     }
 
     // ================================= Socket.IO ================================== //
