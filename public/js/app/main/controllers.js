@@ -30,8 +30,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
     // Получаем UID виджета
     var widget_uid = $cookieStore.get('widget_uid');
 
-    // Резервируем в $scope переменную text
+    // Резервируем в $scope переменную текста сообщения
     $scope.text = '';
+
+    // Резервируем в $scope переменную статуса открытости чата
+    $scope.opened = false;
 
     // ============================== Общие методы ==============================//
     /**
@@ -282,7 +285,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
      * Проверка открытости чата
      */
     $scope.isOpened = function() {
-        console.log($cookieStore.get('opened'));
         return $cookieStore.get('opened');
     }
 
@@ -353,6 +355,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         }
 
         $cookieStore.put('opened', true);
+        $scope.opened = true;
 
         $('#content').slideToggle(300);
 
@@ -369,6 +372,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         }
 
         $cookieStore.put('opened', false);
+        $scope.opened = false;
 
         $('#content').slideToggle(300);
 
