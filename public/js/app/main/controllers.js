@@ -131,12 +131,16 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
         user_data.browser = UAParser('').browser.name + ' ' + UAParser('').browser.version;
         user_data.language = $rootScope.lang;
         // Функция
-        user_data.country = geoip_country_name();
-        user_data.city = geoip_city();
-        // Определяем IP пользователя
-        $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
-            user_data.ip = data.ip;
-        });
+        try {
+            user_data.country = geoip_country_name();
+            user_data.city = geoip_city();
+            // Определяем IP пользователя
+            $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
+                user_data.ip = data.ip;
+            });
+        } catch(e) {
+            console.log('Ошибка получения страны и IP');
+        }
 
         // Оповещаем о необходимости создать чат и пользователя
         socket.emit('chat:create', {
