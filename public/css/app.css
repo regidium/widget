@@ -10,7 +10,7 @@ overflow: hidden;
 position: fixed;
 font-family: Arial;
 font-family: 'Roboto', Arial, sans-serif;
-bottom: -3px;
+bottom: 0;
 left: 3px;
 /*min-height: 185px;*/
 }
