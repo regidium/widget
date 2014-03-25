@@ -17,6 +17,8 @@
             uid: 0,
             height: '100%',
             width: '100%',
+            bottom: '0',
+            right: '30px',
             domain: 'widget.regidium.com',
             class: 'regidium_widget_container'
         }, config);
@@ -42,8 +44,8 @@
                 this.widgetElement.style.maxHeight = '404px';
                 this.widgetElement.style.height = '100%';
                 this.widgetElement.style.width = '318px';
-                this.widgetElement.style.bottom = '0';
-                this.widgetElement.style.right = '0';
+                this.widgetElement.style.bottom = options.bottom;
+                this.widgetElement.style.right = options.right;
                 this.widgetElement.style.overflow = 'hidden';
                 this.widgetElement.style.zIndex = '2147483646';
                 this.widgetElement.setAttribute('id', options.class);
