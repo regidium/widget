@@ -282,6 +282,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound, Widget
      * Проверка открытости чата
      */
     $scope.isOpened = function() {
+        console.log($cookieStore.get('opened'));
         return $cookieStore.get('opened');
     }
 
