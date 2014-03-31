@@ -1,6 +1,6 @@
 <div id="container" ng-class="{'open': opened, '': !opened}">
     <div id="header" ng-style="{ 'background-color': settings.header_color }">
-        <div class="status" ng-click="switch()" translate>Служба поддержки на связи</div>
+        <div class="status" ng-click="switch()" translate>Support Connected</div>
     </div>
     <div id="content">
         <div id="employee">
@@ -10,39 +10,57 @@
                     <img ng-src="{{agent.avatar}}" />
                 </div>
                 <div class="name">
-                    <div class="first-name" ng-bind="agent.fullname">{{agent.fullname}}</div>
-                    <div class="last-name"></div>
+                    <div class="first-name" ng-bind="agent.first_name"></div>
+                    <div class="last-name" ng-bind="agent.last_name"></div>
                 </div>
-                <div class="post">{{agent.agent.job_title}}</div>
+                <div class="post">{{agent.job_title}}</div>
             </div>
         </div>
         <div id="dialogue">
             <div class="content">
-                <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{'msg-output': message.person.user, 'msg-input': message.person.agent }">
-                    <div ng-if="message.person.user">
+                <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{'msg-output': message.sender_type == 1, 'msg-input': message.sender_type == 2 || message.sender_type == 3 }">
+                    <!-- Сообщение от пользователя -->
+                    <div ng-if="message.sender_type == 1">
                         <div class="msg-content-arrow">
                             <div class="msg-content">
                                 <div class="msg-content-text">
                                     <div class="msg-date">{{message.date | date:'shortTime' }}</div>
-                                    <div class="msg-user">{{message.person.fullname}}</div>
+                                    <div class="msg-user">{{user.first_name || 'Вы'}}</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="msg-photo">
-                            <img ng-src="{{message.person.avatar || '/img/user-photo-default.jpg'}}" width="39px" height="39px" />
+                            <img ng-src="{{user.avatar || '/img/user-photo-default.jpg'}}" width="39px" height="39px" />
                         </div>
                     </div>
 
-                    <div ng-if="message.person.agent">
+                    <!-- Сообщение от оператора -->
+                    <div ng-if="message.sender_type == 2">
                         <div class="msg-photo">
-                            <img ng-src="{{message.person.avatar || '/img/user-photo-default.jpg'}}" width="39px" height="39px" />
+                            <img ng-src="{{agent.avatar || '/img/user-photo-default.jpg'}}" width="39px" height="39px" />
                         </div>
                         <div class="msg-content">
                             <div class="msg-content-arrow">
                                 <div class="msg-content-text">
                                     <div class="msg-date">{{message.date | date:'shortTime' }}</div>
-                                    <div class="msg-user">{{message.person.fullname}}</div>
+                                    <div class="msg-user">{{agent.first_name}}</div>
+                                    <div class="msg-text">{{message.text}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Сообщение от робота -->
+                    <div ng-if="message.sender_type == 3">
+                        <div class="msg-photo">
+                            <img ng-src="/img/user-photo-default.jpg" width="39px" height="39px" />
+                        </div>
+                        <div class="msg-content">
+                            <div class="msg-content-arrow">
+                                <div class="msg-content-text">
+                                    <div class="msg-date">{{message.date | date:'shortTime' }}</div>
+                                    <div class="msg-user">Robot</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
                             </div>
@@ -60,13 +78,13 @@
         </div>
         <div id="auth">
             <div class="form-item">
-                <input type="text" placeholder="Имя" class="auth.fullname" />
+                <input type="text" placeholder="Имя" class="auth.first_name" />
             </div>
             <div class="form-item">
                 <input type="text" placeholder="Почта" class="auth.email" />
             </div>
             <div class="form-action">
-                <button ng-click="auth()" translate>Ok</button>
+                <button ng-click="auth()" translate>OK</button>
             </div>
         </div>
     </div>

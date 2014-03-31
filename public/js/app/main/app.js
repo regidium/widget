@@ -6,8 +6,7 @@
         'ngRoute',
         'ngResource',
         'ngCookies',
-        'pascalprecht.translate',
-        'regidiumApp.commonDirectives'
+        'pascalprecht.translate'
     ]).config(['$locationProvider', '$routeProvider', '$translateProvider', function($locationProvider, $routeProvider, $translateProvider) {
         $locationProvider.html5Mode(true);
 
@@ -35,16 +34,6 @@
         $rootScope.ref = $cookieStore.get('referrer');
         // Если текущий URL пользователя не найден - добавляем его
         $rootScope.ref || $cookieStore.put('referrer', document.referrer);
-/*
-        $cookieStore.remove("token");    * widget_uid
-        $cookieStore.remove("me");       * person
-        $cookieStore.remove("messages"); * messages
-        $cookieStore.remove("opened")    * opened
-
-        $cookieStore.remove("cliId");     ?
-        $cookieStore.remove("entId");     ?
-        $cookieStore.remove("hypertext"); ?
-*/
     });
 
 })(angular);
