@@ -13,7 +13,7 @@
                     <div class="first-name" ng-bind="agent.first_name"></div>
                     <div class="last-name" ng-bind="agent.last_name"></div>
                 </div>
-                <div class="post">{{agent.job_title}}</div>
+                <div class="post">{{chat.agent.job_title}}</div>
             </div>
         </div>
         <div id="dialogue">
@@ -24,8 +24,8 @@
                         <div class="msg-content-arrow">
                             <div class="msg-content">
                                 <div class="msg-content-text">
-                                    <div class="msg-date">{{message.date | date:'shortTime' }}</div>
-                                    <div class="msg-user">{{user.first_name || 'Вы'}}</div>
+                                    <div class="msg-date">{{message.created_at | date:'shortTime' }}</div>
+                                    <div class="msg-user">{{chat.user.first_name || 'Вы'}}</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
                             </div>
@@ -43,8 +43,8 @@
                         <div class="msg-content">
                             <div class="msg-content-arrow">
                                 <div class="msg-content-text">
-                                    <div class="msg-date">{{message.date | date:'shortTime' }}</div>
-                                    <div class="msg-user">{{agent.first_name}}</div>
+                                    <div class="msg-date">{{message.created_at | date:'shortTime' }}</div>
+                                    <div class="msg-user">{{chat.agent.first_name}}</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
                             </div>
@@ -59,7 +59,7 @@
                         <div class="msg-content">
                             <div class="msg-content-arrow">
                                 <div class="msg-content-text">
-                                    <div class="msg-date">{{message.date | date:'shortTime' }}</div>
+                                    <div class="msg-date">{{message.created_at | date:'shortTime' }}</div>
                                     <div class="msg-user">Robot</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
@@ -76,15 +76,15 @@
             </div>
             <div class="message-input-content-bg"></div>
         </div>
-        <div id="auth">
+        <div id="auth" ng-hide="auth">
             <div class="form-item">
-                <input type="text" placeholder="Имя" class="auth.first_name" />
+                <input type="text" placeholder="Имя" ng-model="user.first_name" />
             </div>
             <div class="form-item">
-                <input type="text" placeholder="Почта" class="auth.email" />
+                <input type="text" placeholder="Почта" ng-model="user.email" />
             </div>
             <div class="form-action">
-                <button ng-click="auth()" translate>OK</button>
+                <button ng-click="authorization()" translate>OK</button>
             </div>
         </div>
     </div>

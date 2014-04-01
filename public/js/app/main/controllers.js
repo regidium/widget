@@ -40,6 +40,12 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
     // Резервируем в $scope переменную статуса открытости чата
     $scope.opened = false;
 
+    // Резервируем в $scope переменную статуса авторизации
+    $scope.фгер = false;
+
+    // Резервируем в $scope переменную авторизационных данных пользователя
+    $scope.user = { first_name: '', email: '' };
+
     // ============================== Общие методы ==============================//
     /**
      * Получение данных пользователя из cookie
@@ -55,10 +61,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             chat.user.last_name = decodeURIComponent(chat.user.last_name);
         } else {
             chat.user = {};
-        }
-
-        if (!chat.message) {
-            chat.message = [];
         }
 
         return chat;
@@ -112,7 +114,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             if (trigger.result == RESULT_MESSAGE_SEND) {
 
                 var message = {
-                    date: new Date(),
+                    created_at: +new Date,
                     sender_type: SENDER_TYPE_ROBOT,
                     text: trigger.result_params
                 }
@@ -250,8 +252,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
      */
     function chatMessageSendUser(text) {
         var message = {
+            created_at: +new Date,
             sender_type: SENDER_TYPE_USER,
-            date: new Date(),
             text: text
         };
 
@@ -305,6 +307,13 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
      */
     $scope.isOpened = function() {
         return $cookieStore.get('opened');
+    }
+
+    /**
+     * Проверка статуса авторизации
+     */
+    $scope.isAuth = function() {
+        return $cookieStore.get('auth');
     }
 
     // Нажатие клавиш в поле ввода сообщения
@@ -405,14 +414,24 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
     }
 
     // Авторизация
-    $scope.auth = function() {
+    $scope.authorization = function() {
         // Анимация формы авторизации
         $('#auth').fadeOut(300);
-        $scope.chat.user.first_name = $scope.auth.first_name;
-        $scope.chat.user.email = $scope.auth.email;
+        $scope.chat.user.first_name = $scope.user.first_name;
+        $scope.chat.user.email = $scope.user.email;
+
+        var chat = getChat();
+        chat.user.first_name = $scope.user.first_name;
+        chat.user.email = $scope.user.email;
+
+        $cookieStore.put('chat', chat);
+
+        $scope.auth = true;
+        $cookieStore.put('auth', true);
 
         socket.emit('chat:user:auth', {
-            chat: $scope.chat,
+            user: $scope.user,
+            chat_uid: $scope.chat.uid,
             widget_uid: widget_uid
         });
     }
@@ -446,7 +465,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
      * Агент прислал сообщение
      * @param Object data = {
      *       Object agent
-     *       int    date
+     *       int    created_at
      *       string text
      *   }
      */
@@ -519,6 +538,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             // Добавляем статус чата в cookie (закрыт)
             $cookieStore.put('opened', false);
             $scope.opened = false;
+            // Добавляем статус авторизации в cookie (не авторизирован)
+            $cookieStore.put('auth', false);
+            $scope.auth = false;
             // Сворачиваем виджет
             $('#content').hide();
         });
@@ -527,9 +549,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
         $scope.agent = $scope.chat.agent;
         // Оповещаем о подключении чата
         socket.emit('chat:connect', {
-            chat: $scope.chat,
+            chat:       $scope.chat,
             widget_uid: widget_uid
         });
+
+        $scope.auth = $scope.isAuth();
 
         // Если виджет был развернут до обновления страницы, тогда раскрываем его
         if (!$scope.isOpened()) {
