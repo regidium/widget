@@ -24,7 +24,7 @@
                         <div class="msg-content-arrow">
                             <div class="msg-content">
                                 <div class="msg-content-text">
-                                    <div class="msg-date">{{message.created_at | date:'shortTime' }}</div>
+                                    <div class="msg-date">{{message.created_at * 1000 | date:'shortTime' }}</div>
                                     <div class="msg-user">{{chat.user.first_name || 'Вы'}}</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
@@ -43,7 +43,7 @@
                         <div class="msg-content">
                             <div class="msg-content-arrow">
                                 <div class="msg-content-text">
-                                    <div class="msg-date">{{message.created_at | date:'shortTime' }}</div>
+                                    <div class="msg-date">{{message.created_at * 1000 | date:'shortTime' }}</div>
                                     <div class="msg-user">{{chat.agent.first_name}}</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
