@@ -160,7 +160,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
     /**
      * Получение данных пользователя
      */
-    function getUserInfo() {
+    function getUserInfo(cb) {
         var user_data = {};
         user_data.device = UAParser('').device.model + ' ' + UAParser('').device.vendor;
         user_data.os = UAParser('').os.name;
@@ -173,12 +173,12 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             // Определяем IP пользователя
             $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
                 user_data.ip = data.ip;
+                cb(user_data);
             });
         } catch(e) {
             console.log('Ошибка получения IP, страны, города');
+            cb(user_data);
         }
-
-        return user_data;
     }
 
     /**
@@ -186,17 +186,18 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
      */
     function createChat() {
         // Создаем данные пользователя
-        var user_data = getUserInfo();
-        user_data.first_name = 'Client';
-        user_data.last_name = '';
-        user_data.email = '';
+        getUserInfo(function(user_data) {
+            user_data.first_name = 'Client';
+            user_data.last_name = '';
+            user_data.email = '';
 
-        $scope.chat.user = user_data;
+            $scope.chat.user = user_data;
 
-        // Оповещаем о необходимости создать чат
-        socket.emit('chat:create', {
-            widget_uid: widget_uid,
-            chat: $scope.chat
+            // Оповещаем о необходимости создать чат
+            socket.emit('chat:create', {
+                widget_uid: widget_uid,
+                chat: $scope.chat
+            });
         });
     }
 
@@ -442,22 +443,25 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
         // Анимация формы авторизации
         $('#auth').fadeOut(300);
         $scope.chat.user = getUserInfo();
-        $scope.chat.user.first_name = $scope.user.first_name;
-        $scope.chat.user.email = $scope.user.email;
+        getUserInfo(function(user_data) {
+            $scope.chat.user = user_data;
+            $scope.chat.user.first_name = $scope.user.first_name;
+            $scope.chat.user.email = $scope.user.email;
 
-        var chat = getChat();
-        chat.user.first_name = $scope.user.first_name;
-        chat.user.email = $scope.user.email;
+            var chat = getChat();
+            chat.user.first_name = $scope.user.first_name;
+            chat.user.email = $scope.user.email;
 
-        $cookieStore.put('chat', chat);
+            $cookieStore.put('chat', chat);
 
-        $scope.auth = true;
-        $cookieStore.put('auth', true);
+            $scope.auth = true;
+            $cookieStore.put('auth', true);
 
-        socket.emit('chat:user:auth', {
-            user: $scope.user,
-            chat_uid: $scope.chat.uid,
-            widget_uid: widget_uid
+            socket.emit('chat:user:auth', {
+                user: $scope.user,
+                chat_uid: $scope.chat.uid,
+                widget_uid: widget_uid
+            });
         });
     }
 
