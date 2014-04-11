@@ -282,7 +282,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
         // Оповещаем об отправке сообщения
         socket.emit('chat:message:send:user', {
             widget_uid: widget_uid,
-            chat_uid: $scope.chat.uid,
+            chat: $scope.chat,
             message: message
         });
 
