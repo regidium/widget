@@ -371,6 +371,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             // Анимируем блок авторизации
             chatAuthAnimation();
 
+            $scope.chat.status = STATUS_CHATTING;
+            $cookieStore.put('chat', $scope.chat);
+
             return false;
         }
     }
@@ -493,6 +496,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             $scope.agent = data.agent;
 
             $scope.chat.agent = data.agent;
+            $scope.chat.status = STATUS_CHATTING;
 
             $cookieStore.put('chat', $scope.chat);
         }

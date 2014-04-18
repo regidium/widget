@@ -19,7 +19,7 @@
             width: '100%',
             bottom: '0',
             right: '30px',
-            domain: 'widget.regidium.com',
+            domain: 'widget.regidium.loc',
             class: 'regidium_widget_container'
         }, config);
         // Заполняем параметры
