@@ -509,7 +509,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
 
         // Убираем лишние
         if (data.chat_uid == $scope.chat.uid) {
-console.log(data);
             // Оповещаем слушаталей о прочтении сообщения пользователем
             socket.emit('chat:message:read:user', {
                 event_send: true,
