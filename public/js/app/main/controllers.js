@@ -3,7 +3,7 @@
 /**
  * @url "/widget"
  */
-function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
+function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sound) {
     // ============================== Установка параметров ============================== //
     var soundChat = sound.init('chat');
     var soundBell = sound.init('bell');
@@ -25,6 +25,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
 
     // Резервируем в $scope переменную авторизационных данных пользователя
     $scope.user = { first_name: '', email: '' };
+
+    checkTrigger($rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE);
 
     // ============================== Общие методы ==============================//
     /**
@@ -88,44 +90,58 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
     }
 
     /**
+     * Воспроизводим триггер
+     */
+    function runTrigger(trigger) {
+        if (trigger.result == $rootScope.c.TRIGGER_RESULT_MESSAGE_SEND) {
+
+            var message = {
+                created_at: (+new Date) / 1000,
+                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
+                text: trigger.result_params
+            }
+
+            // @todo использовать метод
+            // @todo записывать в БД
+            // Добавляем сообщение в список сообщений
+            $scope.chat.messages.push(message);
+
+            // Записываем сообщения в сессию
+            sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
+
+            // Пролистываем до последнего сообщения
+            scrollToBottom();
+        } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_AGENTS_ALERT) {
+            // @todo
+            console.log('Оповещаем агентов');
+        } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_OPEN) {
+            // @Todo
+            if (!$scope.isOpened()) {
+                self.open();
+            }
+        } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_BELL) {
+            // @Todo
+            widgetBell();
+        }
+
+        if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
+            $timeout.cancel();
+        }
+    }
+
+    /**
      * Проверяем и воспроизводим триггер
      */
     function checkTrigger(name) {
-
         if ($scope.triggers && $scope.triggers[name]) {
             console.log('Enabled Trigger');
 
             var trigger = $scope.triggers[name];
-            if (trigger.result == $rootScope.c.TRIGGER_RESULT_MESSAGE_SEND) {
 
-                var message = {
-                    created_at: (+new Date) / 1000,
-                    sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
-                    text: trigger.result_params
-                }
-
-                // @todo использовать метод
-                // @todo записывать в БД
-                // Добавляем сообщение в список сообщений
-                $scope.chat.messages.push(message);
-
-                // Записываем сообщения в сессию
-                sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
-
-                // Пролистываем до последнего сообщения
-                scrollToBottom();
-
-            } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_AGENTS_ALERT) {
-                // @todo
-                console.log('Оповещаем агентов');
-            } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_OPEN) {
-                // @Todo
-                if (!$scope.isOpened()) {
-                    self.open();
-                }
-            } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_BELL) {
-                // @Todo
-                widgetBell();
+            if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
+                $timeout(runTrigger(trigger), parseInt(trigger.event_params)*100);
+            } else {
+                runTrigger(trigger);
             }
         }
     }
