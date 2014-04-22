@@ -38,7 +38,14 @@
         "start": "node server.js"
     },
     "dependencies": {
-        "express": "3.x",
+        "express": "4.x",
+        "static-favicon": "1.x",
+        "compression": "1.x",
+        "body-parser": "1.x",
+        "cookie-parser": "1.x",
+        "cookie-session": "1.x",
+        "method-override": "1.x",
+        "morgan": "1.x",
         "jade": "1.x",
         "consolidate": "0.10.x",
         "cookie": "0.1.x"

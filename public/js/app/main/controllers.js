@@ -1,31 +1,5 @@
 'use strict';
 
-var STATUS_ONLINE   = 1;
-var STATUS_CHATTING = 2;
-var STATUS_OFFLINE  = 3;
-var STATUS_ARCHIVED = 4;
-var STATUS_DELETED  = 5;
-
-var EVENT_WIDGET_CREATED = 1;
-var EVENT_WORD_SEND = 2;
-var EVENT_TIME_ONE_PAGE = 3;
-var EVENT_VISIT_PAGE = 4;
-var EVENT_VISIT_FROM_URL = 5;
-var EVENT_VISIT_FROM_KEY_WORD = 6;
-var EVENT_CHAT_OPENED = 7;
-var EVENT_CHAT_CLOSED = 8;
-var EVENT_MESSAGE_START = 9;
-var EVENT_MESSAGE_SEND = 10;
-
-var RESULT_MESSAGE_SEND = 1;
-var RESULT_AGENTS_ALERT = 2;
-var RESULT_WIDGET_OPEN = 3;
-var RESULT_WIDGET_BELL = 4;
-
-var SENDER_TYPE_USER = 1;
-var SENDER_TYPE_AGENT = 2;
-var SENDER_TYPE_ROBOT = 3;
-
 /**
  * @url "/widget"
  */
@@ -47,7 +21,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
     $scope.opened = false;
 
     // Резервируем в $scope переменную статуса авторизации
-    $scope.фгер = false;
+    $scope.auth = false;
 
     // Резервируем в $scope переменную авторизационных данных пользователя
     $scope.user = { first_name: '', email: '' };
@@ -89,11 +63,10 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
 
         try {
             messages = JSON.parse(messages);
+            if (!messages) {
+                messages = [];
+            }
         } catch(e) {
-            messages = [];
-        }
-
-        if (!messages) {
             messages = [];
         }
 
@@ -123,11 +96,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             console.log('Enabled Trigger');
 
             var trigger = $scope.triggers[name];
-            if (trigger.result == RESULT_MESSAGE_SEND) {
+            if (trigger.result == $rootScope.c.TRIGGER_RESULT_MESSAGE_SEND) {
 
                 var message = {
                     created_at: (+new Date) / 1000,
-                    sender_type: SENDER_TYPE_ROBOT,
+                    sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
                     text: trigger.result_params
                 }
 
@@ -142,15 +115,15 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
                 // Пролистываем до последнего сообщения
                 scrollToBottom();
 
-            } else if (trigger.result == RESULT_AGENTS_ALERT) {
+            } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_AGENTS_ALERT) {
                 // @todo
                 console.log('Оповещаем агентов');
-            } else if (trigger.result == RESULT_WIDGET_OPEN) {
+            } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_OPEN) {
                 // @Todo
                 if (!$scope.isOpened()) {
                     self.open();
                 }
-            } else if (trigger.result == RESULT_WIDGET_BELL) {
+            } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_BELL) {
                 // @Todo
                 widgetBell();
             }
@@ -275,7 +248,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
     function chatMessageSendUser(text) {
         var message = {
             created_at: +new Date,
-            sender_type: SENDER_TYPE_USER,
+            sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_USER,
             text: text
         };
 
@@ -295,8 +268,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
         // Очищаем поле ввода сообщения
         $scope.text = '';
 
-        $scope.chat.status = STATUS_CHATTING;
-        $scope.chat.old_status = STATUS_CHATTING;
+        $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
+        $scope.chat.old_status = $rootScope.c.CHAT_STATUS_CHATTING;
 
         // Пролистываем до посдеднего сообщения
         scrollToBottom();
@@ -331,7 +304,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
      * Проверка открытости чата
      */
     $scope.isOpened = function() {
-        return $cookieStore.get('opened');
+        var opened = $cookieStore.get('opened');
+        if (!opened) {
+            return false;
+        }
+        return opened;
     }
 
     /**
@@ -347,7 +324,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
         evt = (evt) ? evt : window.event;
         var charCode = (evt.which) ? evt.which : evt.keyCode;
         // Обрботка триггера
-        checkTrigger(EVENT_MESSAGE_START, { message: $scope.text });
+        checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_START, { message: $scope.text });
         // Если нажат ENTER
         if (charCode == 13) {
             // Если виджет не открыт, тогда открываем его
@@ -361,9 +338,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             };
 
             // Обрботка триггера
-            checkTrigger(EVENT_WORD_SEND);
+            checkTrigger($rootScope.c.TRIGGER_EVENT_WORD_SEND);
             // Обрботка триггера
-            checkTrigger(EVENT_MESSAGE_SEND);
+            checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_SEND);
 
             // Отправка сообщения
             chatMessageSendUser($scope.text);
@@ -371,7 +348,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             // Анимируем блок авторизации
             chatAuthAnimation();
 
-            $scope.chat.status = STATUS_CHATTING;
+            $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
             $cookieStore.put('chat', $scope.chat);
 
             return false;
@@ -399,7 +376,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
 
         // Обрабатываем триггер
         if (!$scope.isOpened()) {
-            checkTrigger(EVENT_CHAT_OPENED);
+            checkTrigger($rootScope.c.TRIGGER_EVENT_CHAT_OPENED);
         }
 
         // Запоминаем состояние чата
@@ -419,7 +396,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
 
         // Обрабатываем триггер
         if ($scope.isOpened()) {
-            checkTrigger(EVENT_CHAT_CLOSED);
+            checkTrigger($rootScope.c.TRIGGER_EVENT_CHAT_CLOSED);
         }
 
         // Запоминаем состояние чата
@@ -496,7 +473,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             $scope.agent = data.agent;
 
             $scope.chat.agent = data.agent;
-            $scope.chat.status = STATUS_CHATTING;
+            $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
 
             $cookieStore.put('chat', $scope.chat);
         }
@@ -516,6 +493,30 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
         // Убираем лишние
         if (data.chat_uid == $scope.chat.uid) {
             chatMessageSendAgent(data);
+        }
+    });
+
+    /**
+     * Агент прислал сообщение
+     * @param Object data = {
+     *       Object message
+     *       string chat_uid
+     *       string widget_uid
+     *   }
+     */
+    socket.on('chat:message:sended:agent', function (data) {
+        console.log('Socket chat:message:sended:agent');
+
+        // Убираем лишние
+        if (data.chat_uid == $scope.chat.uid) {
+console.log(data);
+            // Оповещаем слушаталей о прочтении сообщения пользователем
+            socket.emit('chat:message:read:user', {
+                event_send: true,
+                message_uid: data.message.uid,
+                chat_uid: data.chat_uid,
+                widget_uid: widget_uid,
+            });
         }
     });
 
@@ -562,7 +563,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
         socket.on('chat:created', function (data) {
             console.log('Socket chat:created');
 
-            checkTrigger(EVENT_WIDGET_CREATED);
+            // Проверяем триггер
+            checkTrigger($rootScope.c.TRIGGER_EVENT_WIDGET_CREATED);
 
             // Оповещаем о подключении чата
             socket.emit('chat:connected', {
@@ -594,13 +596,14 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, socket, sound) {
             widget_uid: widget_uid
         });
 
+        // Заполняем статус авторизации
         $scope.auth = $scope.isAuth();
 
         // Если виджет был развернут до обновления страницы, тогда раскрываем его
-        if (!$scope.isOpened()) {
-            $scope.close();
-        } else {
+        if ($scope.isOpened()) {
             $scope.open();
+        } else {
+            $('#content').hide();
         }
 
         // Запрашиваем информацию о виджете

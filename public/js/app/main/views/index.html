@@ -18,9 +18,9 @@
         </div>
         <div id="dialogue">
             <div class="content">
-                <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{'msg-output': message.sender_type == 1, 'msg-input': message.sender_type == 2 || message.sender_type == 3 }">
+                <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{'msg-output': message.sender_type == c.MESSAGE_SENDER_TYPE_USER, 'msg-input': message.sender_type == c.MESSAGE_SENDER_TYPE_AGENT || message.sender_type == c.MESSAGE_SENDER_TYPE_ROBOT }">
                     <!-- Сообщение от пользователя -->
-                    <div ng-if="message.sender_type == 1">
+                    <div ng-if="message.sender_type == c.MESSAGE_SENDER_TYPE_USER">
                         <div class="msg-content-arrow">
                             <div class="msg-content">
                                 <div class="msg-content-text">
@@ -36,7 +36,7 @@
                     </div>
 
                     <!-- Сообщение от оператора -->
-                    <div ng-if="message.sender_type == 2">
+                    <div ng-if="message.sender_type == c.MESSAGE_SENDER_TYPE_AGENT">
                         <div class="msg-photo">
                             <img ng-src="{{agent.avatar || '/img/user-photo-default.jpg'}}" width="39px" height="39px" />
                         </div>
@@ -52,7 +52,7 @@
                     </div>
 
                     <!-- Сообщение от робота -->
-                    <div ng-if="message.sender_type == 3">
+                    <div ng-if="message.sender_type == c.MESSAGE_SENDER_TYPE_ROBOT">
                         <div class="msg-photo">
                             <img ng-src="/img/user-photo-default.jpg" width="39px" height="39px" />
                         </div>
