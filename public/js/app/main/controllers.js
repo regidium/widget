@@ -26,8 +26,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     // Резервируем в $scope переменную авторизационных данных пользователя
     $scope.user = { first_name: '', email: '' };
 
-    checkTrigger($rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE);
-
     // ============================== Общие методы ==============================//
     /**
      * Получение данных пользователя из cookie
@@ -125,7 +123,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         }
 
         if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
-            $timeout.cancel();
+            $timeout.cancel(triggerPromise);
         }
     }
 
@@ -139,7 +137,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             var trigger = $scope.triggers[name];
 
             if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
-                $timeout(runTrigger(trigger), parseInt(trigger.event_params)*100);
+                var triggerPromise = $timeout(function() { runTrigger(trigger) }, parseInt(trigger.event_params)*1000);
             } else {
                 runTrigger(trigger);
             }
@@ -496,6 +494,29 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     });
 
     /**
+     * Агент отключился от чата
+     * @param Object data = {
+     *       Object agent
+     *       string chat_uid
+     *       string widget_uid
+     *   }
+     */
+    socket.on('chat:agent:leave', function (data) {
+        console.log('Socket chat:agent:leave');
+
+        // Фильтруем лишнее
+        if ($scope.chat.uid == data.chat_uid) {
+            // Обнуляем переменную agent
+            delete $scope.agent;
+
+            delete $scope.chat.agent;
+            //$scope.chat.status = $rootScope.c.CHAT_STATUS_ONLINE;
+
+            $cookieStore.put('chat', $scope.chat);
+        }
+    });
+
+    /**
      * Агент прислал сообщение
      * @param Object data = {
      *       Object agent
@@ -554,6 +575,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
         // Отображаем виджет
         widgetShow();
+
+        // Проверяем триггер
+        checkTrigger($rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE);
     });
 
     // ============================================================================= //
