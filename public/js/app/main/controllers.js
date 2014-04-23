@@ -122,9 +122,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             widgetBell();
         }
 
-        if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
-            $timeout.cancel(triggerPromise);
-        }
+        // if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
+        //     $timeout.cancel(triggerPromise);
+        // }
     }
 
     /**
