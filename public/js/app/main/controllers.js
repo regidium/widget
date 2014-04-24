@@ -133,6 +133,20 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     function checkTrigger(name) {
         if ($scope.triggers && $scope.triggers[name]) {
             console.log('Enabled Trigger');
+            try {
+                var activated_triggers = sessionStorage.getItem('triggers');
+                activated_triggers = JSON.parse(activated_triggers);
+                if (!activated_triggers) {
+                    activated_triggers = {};
+                }
+            } catch(e) {
+                activated_triggers = {};
+            }
+
+            // Не повторяем триггер если он уже был воспроизведен
+            if (activated_triggers[name]) {
+                return;
+            }
 
             var trigger = $scope.triggers[name];
 
@@ -141,6 +155,10 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             } else {
                 runTrigger(trigger);
             }
+
+            // Запоминаем воспроизведенный триггер
+            activated_triggers[name] = true;
+            sessionStorage.setItem('triggers', JSON.stringify(activated_triggers));
         }
     }
 
