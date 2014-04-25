@@ -90,7 +90,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     /**
      * Воспроизводим триггер
      */
-    function runTrigger(trigger) {
+    function runTrigger(trigger, cb) {
+        console.log('Run Trigger');
+
         if (trigger.result == $rootScope.c.TRIGGER_RESULT_MESSAGE_SEND) {
 
             var message = {
@@ -111,9 +113,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             scrollToBottom();
 
             // Открываем виджет
-            if (!$scope.isOpened()) {
-                $scope.open();
-            }
+            // if (!$scope.isOpened()) {
+            //     $scope.open();
+            // } else {
+            //     checkTrigger($rootScope.c.TRIGGER_EVENT_CHAT_OPENED);
+            // }
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_AGENTS_ALERT) {
             // @todo
             console.log('Оповещаем агентов');
@@ -121,15 +125,19 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             // Открываем виджет
             if (!$scope.isOpened()) {
                 $scope.open();
+            // } else {
+            //     checkTrigger($rootScope.c.TRIGGER_EVENT_CHAT_OPENED);
             }
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_BELL) {
             // @Todo
             widgetBell();
         }
 
-        // if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
-        //     $timeout.cancel(triggerPromise);
-        // }
+        //if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
+            if (cb) {
+                cb();
+            }
+        //}
     }
 
     /**
@@ -137,7 +145,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      */
     function checkTrigger(name) {
         if ($scope.triggers && $scope.triggers[name]) {
-            console.log('Enabled Trigger');
+            console.log('Check Trigger');
 
             var trigger = $scope.triggers[name];
 
@@ -156,15 +164,15 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
                 return;
             }
 
-            if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
-                var triggerPromise = $timeout(function() { runTrigger(trigger) }, parseInt(trigger.event_params)*1000);
-            } else {
-                runTrigger(trigger);
-            }
-
             // Запоминаем воспроизведенный триггер
             activated_triggers[trigger.uid] = true;
             sessionStorage.setItem('triggers', JSON.stringify(activated_triggers));
+
+            if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
+                var triggerPromise = $timeout(function() { runTrigger(trigger, function(){ $timeout.cancel(triggerPromise); }) }, parseInt(trigger.event_params)*1000);
+            } else {
+                runTrigger(trigger);
+            }
         }
     }
 
