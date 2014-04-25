@@ -109,13 +109,18 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
             // Пролистываем до последнего сообщения
             scrollToBottom();
+
+            // Открываем виджет
+            if (!$scope.isOpened()) {
+                $scope.open();
+            }
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_AGENTS_ALERT) {
             // @todo
             console.log('Оповещаем агентов');
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_OPEN) {
-            // @Todo
+            // Открываем виджет
             if (!$scope.isOpened()) {
-                self.open();
+                $scope.open();
             }
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_BELL) {
             // @Todo
@@ -133,6 +138,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     function checkTrigger(name) {
         if ($scope.triggers && $scope.triggers[name]) {
             console.log('Enabled Trigger');
+
+            var trigger = $scope.triggers[name];
+
             try {
                 var activated_triggers = sessionStorage.getItem('triggers');
                 activated_triggers = JSON.parse(activated_triggers);
@@ -144,11 +152,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             }
 
             // Не повторяем триггер если он уже был воспроизведен
-            if (activated_triggers[name]) {
+            if (activated_triggers[trigger.uid]) {
                 return;
             }
-
-            var trigger = $scope.triggers[name];
 
             if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
                 var triggerPromise = $timeout(function() { runTrigger(trigger) }, parseInt(trigger.event_params)*1000);
@@ -157,7 +163,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             }
 
             // Запоминаем воспроизведенный триггер
-            activated_triggers[name] = true;
+            activated_triggers[trigger.uid] = true;
             sessionStorage.setItem('triggers', JSON.stringify(activated_triggers));
         }
     }

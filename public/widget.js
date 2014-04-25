@@ -1,4 +1,4 @@
-(function() {
+(function(document) {
     /* REGIDIUM */
     REGIDIUM_ONLINE = true;
 
@@ -20,11 +20,11 @@
             bottom: '0',
             right: '30px',
             domain: 'widget.regidium.com',
-            class: 'regidium_widget_container'
+            widget_class: 'regidium_widget_container'
         }, config);
         // Заполняем параметры
         options.widget_url = [Util.proto, options.domain, '/', options.uid].join('');
-        options.widget_url += '#' + encodeURIComponent(document.location.href);
+        //options.widget_url += '#' + encodeURIComponent(document.location.href);
 
         Widget = {
             created: false,
@@ -48,8 +48,8 @@
                 this.widgetElement.style.right = options.right;
                 this.widgetElement.style.overflow = 'hidden';
                 this.widgetElement.style.zIndex = '2147483646';
-                this.widgetElement.setAttribute('id', options.class);
-                this.widgetElement.setAttribute('class', options.class);
+                this.widgetElement.setAttribute('id', options.widget_class);
+                this.widgetElement.setAttribute('class', options.widget_class);
                 // Подключаем iframe к блоку виджета
                 this.widgetElement.innerHTML = '<iframe id="regidium_widget_iframe" src="' + options.widget_url + '" scrolling="no" width="'+options.width+'" height="'+options.height+'" frameborder="0"></iframe>';
                 this.created = true;
@@ -69,4 +69,4 @@
 
     // Создаем виджет
     createWidget(widgetOptions);
-})();
+})(document);
