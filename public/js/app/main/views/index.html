@@ -5,8 +5,8 @@
     <div id="content">
         <div id="employee">
             <div ng-show="agent">
-                <div class="logo"></div>
-                <div class="photo">
+                <div class="logo" style="max-height: 79px;"></div>
+                <div class="photo" style="max-height: 79px;">
                     <img ng-src="{{agent.avatar}}" />
                 </div>
                 <div class="name">
@@ -70,11 +70,18 @@
             </div>
         </div>
         <div id="message-input" ng-class="{'full': isOpened}">
-            <div class="message-input-content">
-                <textarea ng-model="text" ng-keyup="enter()"></textarea>
-                <span class="info-text" ng-click="focus()" ng-bind="input_description" translate></span>
-            </div>
-            <div class="message-input-content-bg"></div>
+            <form ng-init="focused=false" class="message-input-content">
+                <textarea
+                        ng-model="text"
+                        ng-focus="messageFocus()"
+                        ng-blur="messageBlur()"
+                        ng-keyup="messageEdit($event)"
+                        style="height: 52px;"
+                        placeholder="{{messagePlaceholder}}"
+                ></textarea>
+                <!--<span ng-hide="focused" ng-click="focus()" class="info-text" translate>Write your message and press Enter</span>-->
+            </form>
+            <div class="message-input-content-bg" ng-show="focused"></div>
         </div>
 <!--         <div id="auth" ng-hide="auth">
             <div class="form-item">

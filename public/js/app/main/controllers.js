@@ -11,8 +11,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     // Скрываем виджет
     widgetHide();
 
-    // Получаем UID виджета
-    var widget_uid = $cookieStore.get('widget_uid');
+    // Резервируем переменную начала ввода сообщения
+    var message_started = false;
 
     // Резервируем в $scope переменную текста сообщения
     $scope.text = '';
@@ -25,6 +25,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
     // Резервируем в $scope переменную авторизационных данных пользователя
     $scope.user = { first_name: '', email: '' };
+
+    $scope.messagePlaceholder = 'Write your message and press Enter';
 
     // ============================== Общие методы ==============================//
     /**
@@ -211,13 +213,35 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             user_data.email = '';
 
             $scope.chat.user = user_data;
+            /** @todo Не готово */
+            //$scope.chat.referrer = document.referrer;
+            $scope.chat.current_url = document.location.href;
 
             // Оповещаем о необходимости создать чат
             socket.emit('chat:create', {
-                widget_uid: widget_uid,
+                widget_uid: $rootScope.widget_uid,
                 chat: $scope.chat
             });
         });
+    }
+
+    /**
+     * Проверка текущего URL
+     */
+    function checkUrl() {
+        // Получаем текущий URL
+        var current_url = document.referrer;
+        if ($cookieStore.get('url') != current_url) {
+                    console.log(current_url);
+            // Оповещаем о смене URL
+            socket.emit('chat:url:change', {
+                new_url: current_url,
+                chat_uid: $scope.chat.uid,
+                widget_uid: $rootScope.widget_uid
+            });
+        }
+        // Сохраняем URL
+        $cookieStore.put('url', current_url);
     }
 
     /**
@@ -300,7 +324,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
         // Оповещаем об отправке сообщения
         socket.emit('chat:message:send:user', {
-            widget_uid: widget_uid,
+            widget_uid: $rootScope.widget_uid,
             chat: $scope.chat,
             message: message
         });
@@ -326,7 +350,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      */
      function getWidgetInfo() {
          socket.emit('widget:info:get', {
-             widget_uid: widget_uid,
+             widget_uid: $rootScope.widget_uid,
              chat_uid: $scope.chat.uid
          });
      }
@@ -342,7 +366,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
         socket.emit('chat:page:change', {
             chat_uid: $scope.chat.uid,
-            widget_uid: widget_uid
+            widget_uid: $rootScope.widget_uid
         });
     });
 
@@ -364,41 +388,81 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         return $cookieStore.get('auth');
     }
 
-    // Нажатие клавиш в поле ввода сообщения
-    $scope.enter = function(evt) {
-        // Получаем событие нажатия
-        evt = (evt) ? evt : window.event;
-        var charCode = (evt.which) ? evt.which : evt.keyCode;
+    /**
+     * Отправка сообщения
+     */
+    $scope.sendMessage = function() {
+        console.log($scope.text);
+        // Если виджет не открыт, тогда открываем его
+        if (!$scope.isOpened()) {
+            $scope.open();
+        }
+
+        // Блокируем отправку пустых сообщений
+        if ($scope.text.length == 0) {
+            return false;
+        };
+
         // Обрботка триггера
-        checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_START, { message: $scope.text });
-        // Если нажат ENTER
-        if (charCode == 13) {
-            // Если виджет не открыт, тогда открываем его
-            if (!$scope.isOpened()) {
-                $scope.open();
-            }
+        checkTrigger($rootScope.c.TRIGGER_EVENT_WORD_SEND);
+        // Обрботка триггера
+        checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_SEND);
 
-            // Блокируем отправку пустых сообщений
-            if ($scope.text.length == 0) {
-                return false;
-            };
+        // Отправка сообщения
+        chatMessageSendUser($scope.text);
 
-            // Обрботка триггера
-            checkTrigger($rootScope.c.TRIGGER_EVENT_WORD_SEND);
-            // Обрботка триггера
-            checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_SEND);
+        // Анимируем блок авторизации
+        chatAuthAnimation();
 
-            // Отправка сообщения
-            chatMessageSendUser($scope.text);
-
-            // Анимируем блок авторизации
-            chatAuthAnimation();
-
+        // Меняем статус чата на "В чате"
+        if ($scope.chat.status != $rootScope.c.CHAT_STATUS_CHATTING) {
             $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
             $cookieStore.put('chat', $scope.chat);
-
-            return false;
         }
+    }
+
+    // Нажатие клавиш в поле ввода сообщения
+    $scope.messageEdit = function(e) {
+        console.log(e);
+        // Получаем событие нажатия
+        e = (e) ? e : window.event;
+        var charCode = (e.which) ? e.which : e.keyCode;
+        if (!message_started && !(charCode == 13 && !e.shiftKey)) {
+            // Обрботка триггера
+            checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_START, { message: $scope.text });
+        }
+
+        if (charCode == 13 && !e.shiftKey) {
+            $scope.sendMessage();
+        }
+        // Если нажат ENTER
+        // if (charCode == 13) {
+        //     // Если виджет не открыт, тогда открываем его
+        //     if (!$scope.isOpened()) {
+        //         $scope.open();
+        //     }
+
+        //     // Блокируем отправку пустых сообщений
+        //     if ($scope.text.length == 0) {
+        //         return false;
+        //     };
+
+        //     // Обрботка триггера
+        //     checkTrigger($rootScope.c.TRIGGER_EVENT_WORD_SEND);
+        //     // Обрботка триггера
+        //     checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_SEND);
+
+        //     // Отправка сообщения
+        //     chatMessageSendUser($scope.text);
+
+        //     // Анимируем блок авторизации
+        //     chatAuthAnimation();
+
+        //     $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
+        //     $cookieStore.put('chat', $scope.chat);
+
+        //     return false;
+        // }
     }
 
     // Переключение режима виджета
@@ -417,7 +481,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         // Оповещаем сервер об открытии чата
         socket.emit('chat:open', {
             chat_uid: $scope.chat.uid,
-            widget_uid: widget_uid
+            widget_uid: $rootScope.widget_uid
         });
 
         // Обрабатываем триггер
@@ -431,10 +495,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
         $('#content').slideToggle(300);
 
-        // Разворачиваем облость ввода сообщения
-        $('#message-input textarea').animate({height: '15px'});
-        // Отображаем подпись поля ввода сообщения
-        $scope.input_description = 'Write your message and press Enter';
+        // Разворачиваем область ввода сообщения
+        //$('#message-input textarea').animate({height: '55px'});
     }
 
     // Сворачиваем виджет
@@ -452,16 +514,27 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         $('#content').slideToggle(300);
 
         // Анимация поля ввода сообщения
-        $('#message-input textarea').animate({height: '55px'});
+        //$('#message-input textarea').animate({height: '55px'});
         // Текст в поле
-        setTimeout("$('#message-input .message-input-content span').delay(1000);", 300);
+        //setTimeout("$('#message-input .message-input-content span').delay(1000);", 300);
     }
 
     // Активируем поле ввода сообщения
     $scope.focus = function() {
-        $('#message-input .message-input-content span').fadeOut(100);
-        $('.message-input-content-bg').fadeIn(300);
-        $('#message-input .message-input-content textarea').focus();
+        $scope.focused = true;
+        //$('#message-input .message-input-content span').fadeOut(100);
+        //$('.message-input-content-bg').fadeIn(300);
+        //$('#message-input .message-input-content textarea').focus();
+    }
+
+    $scope.messageFocus = function() {
+        $scope.focused = true;
+        $scope.messagePlaceholder = '';
+    }
+
+    $scope.messageBlur = function() {
+        $scope.focused = false;
+        //$scope.messagePlaceholder = 'Write your message and press Enter';
     }
 
     // Авторизация
@@ -486,7 +559,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             socket.emit('chat:user:auth', {
                 user: $scope.user,
                 chat_uid: $scope.chat.uid,
-                widget_uid: widget_uid
+                widget_uid: $rootScope.widget_uid
             });
         });
     }
@@ -583,7 +656,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
                 event_send: true,
                 message_uid: data.message.uid,
                 chat_uid: data.chat_uid,
-                widget_uid: widget_uid,
+                widget_uid: $rootScope.widget_uid
             });
         }
     });
@@ -664,7 +737,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         // Оповещаем о подключении чата
         socket.emit('chat:connect', {
             chat:       $scope.chat,
-            widget_uid: widget_uid
+            widget_uid: $rootScope.widget_uid
         });
 
         // Заполняем статус авторизации
@@ -679,17 +752,20 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
         // Запрашиваем информацию о виджете
         getWidgetInfo();
+
+        checkUrl();
     }
 
     $(document).ready(function() {
         // Прокручиваем виджет к последнему сообщению
         scrollToBottom();
         // Скрытие рамки поля для ввода
-        $(document).mouseup(function (e) {
-            if ($(".message-input-content").has(e.target).length === 0) {
-                $(".message-input-content-bg").fadeOut(300);
-            }
-        });
+//        $(document).mouseup(function (e) {
+//            // Если нажатие было вне блока ввода сообщения
+//            if ($(".message-input-content").has(e.target).length === 0) {
+//                $(".message-input-content-bg").fadeOut(300);
+//            }
+//        });
 
         // Выезжание формы при открытии
         $('#header').slideDown(350);
