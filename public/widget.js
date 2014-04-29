@@ -19,7 +19,7 @@
             width: '100%',
             bottom: '0',
             right: '30px',
-            domain: 'widget.regidium.com',
+            domain: 'widget.regidium.loc',
             widget_class: 'regidium_widget_container'
         }, config);
         // Заполняем параметры
@@ -34,7 +34,7 @@
                     return cb(this.widgetElement);
                 }
 
-                // Создаем блок виджета
+                // Создаем элемент блока виджета
                 this.widgetElement = document.createElement('div');
                 // Скрываем блок виджета
                 this.widgetElement.style.display = 'none';
@@ -50,12 +50,27 @@
                 this.widgetElement.style.zIndex = '2147483646';
                 this.widgetElement.setAttribute('id', options.widget_class);
                 this.widgetElement.setAttribute('class', options.widget_class);
+
+                // Создаем элемент iframe виджета
+                var iframeElement = document.createElement('iframe');
+                iframeElement.setAttribute('id', 'regidium_widget_iframe');
+                iframeElement.setAttribute('src', 'about:blank');
+                iframeElement.setAttribute('scrolling', 'no');
+                iframeElement.style.width = options.width;
+                iframeElement.style.height = options.height;
+                iframeElement.setAttribute('frameborder', '0');
                 // Подключаем iframe к блоку виджета
-                this.widgetElement.innerHTML = '<iframe id="regidium_widget_iframe" src="' + options.widget_url + '" scrolling="no" width="'+options.width+'" height="'+options.height+'" frameborder="0"></iframe>';
-                this.created = true;
+                this.widgetElement.appendChild(iframeElement);
 
                 // Подключаем блок виджета к странице
                 document.body.insertBefore(this.widgetElement, document.body.nextSibling);
+
+                // Подключаем iframe к блоку виджета
+                iframeElement = document.getElementById('regidium_widget_iframe');
+                iframeElement.setAttribute('src', options.widget_url);
+
+                this.created = true;
+
                 // Показываем блок виджета
                 Widget.show();
             },

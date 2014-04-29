@@ -9,7 +9,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     var soundBell = sound.init('bell');
 
     // Скрываем виджет
-    widgetHide();
+    //widgetHide();
 
     // Резервируем переменную начала ввода сообщения
     var message_started = false;
@@ -232,7 +232,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         // Получаем текущий URL
         var current_url = document.referrer;
         if ($cookieStore.get('url') != current_url) {
-                    console.log(current_url);
             // Оповещаем о смене URL
             socket.emit('chat:url:change', {
                 new_url: current_url,
