@@ -9,7 +9,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     var soundBell = sound.init('bell');
 
     // Скрываем виджет
-    //widgetHide();
+    widgetHide();
 
     // Резервируем переменную начала ввода сообщения
     var message_started = false;

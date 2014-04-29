@@ -68,13 +68,10 @@
                 // Подключаем iframe к блоку виджета
                 iframeElement = document.getElementById('regidium_widget_iframe');
                 iframeElement.setAttribute('src', options.widget_url);
-
-                this.created = true;
-
-                // Показываем блок виджета
-                Widget.show();
+                iframeElement.setAttribute('onload', Widget.show());
             },
             show: function() {
+                this.created = true;
                 this.widgetElement.style.display = 'block';
             }
         }
