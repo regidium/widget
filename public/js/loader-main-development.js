@@ -1,3 +1,5 @@
+var env = 'development';
+
 head.load(
     // Common
     "/js/libs/jquery/jquery.min.js",

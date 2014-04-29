@@ -93,7 +93,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Воспроизводим триггер
      */
     function runTrigger(trigger, cb) {
-        console.log('Run Trigger');
+        $rootScope.log('Run Trigger');
 
         if (trigger.result == $rootScope.c.TRIGGER_RESULT_MESSAGE_SEND) {
 
@@ -122,7 +122,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             // }
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_AGENTS_ALERT) {
             // @todo
-            console.log('Оповещаем агентов');
+            $rootScope.log('Оповещаем агентов');
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_OPEN) {
             // Открываем виджет
             if (!$scope.isOpened()) {
@@ -147,7 +147,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      */
     function checkTrigger(name) {
         if ($scope.triggers && $scope.triggers[name]) {
-            console.log('Check Trigger');
+            $rootScope.log('Check Trigger');
 
             var trigger = $scope.triggers[name];
 
@@ -197,7 +197,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
                 cb(user_data);
             });
         } catch(e) {
-            console.log('Ошибка получения IP, страны, города');
+            $rootScope.log('Ошибка получения IP, страны, города');
             cb(user_data);
         }
     }
@@ -361,7 +361,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Страница меняется
      */
     $scope.$on('$locationChangeStart', function(event) {
-        console.log('AngularJS $locationChangeStart');
+        $rootScope.log('AngularJS $locationChangeStart');
 
         socket.emit('chat:page:change', {
             chat_uid: $scope.chat.uid,
@@ -391,7 +391,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Отправка сообщения
      */
     $scope.sendMessage = function() {
-        console.log($scope.text);
+        $rootScope.log($scope.text);
         // Если виджет не открыт, тогда открываем его
         if (!$scope.isOpened()) {
             $scope.open();
@@ -422,7 +422,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
     // Нажатие клавиш в поле ввода сообщения
     $scope.messageEdit = function(e) {
-        console.log(e);
         // Получаем событие нажатия
         e = (e) ? e : window.event;
         var charCode = (e.which) ? e.which : e.keyCode;
@@ -574,7 +573,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:agent:enter', function (data) {
-        console.log('Socket chat:agent:enter');
+        $rootScope.log('Socket chat:agent:enter');
 
         // Фильтруем лишнее
         if ($scope.chat.uid == data.chat.uid) {
@@ -606,7 +605,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:agent:leave', function (data) {
-        console.log('Socket chat:agent:leave');
+        $rootScope.log('Socket chat:agent:leave');
 
         // Фильтруем лишнее
         if ($scope.chat.uid == data.chat_uid) {
@@ -629,7 +628,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:message:send:agent', function (data) {
-        console.log('Socket chat:message:send:agent');
+        $rootScope.log('Socket chat:message:send:agent');
 
         // Убираем лишние
         if (data.chat_uid == $scope.chat.uid) {
@@ -646,7 +645,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:message:sended:agent', function (data) {
-        console.log('Socket chat:message:sended:agent');
+        $rootScope.log('Socket chat:message:sended:agent');
 
         // Убираем лишние
         if (data.chat_uid == $scope.chat.uid) {
@@ -665,7 +664,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * @param Object data
      */
     socket.on('widget:info:sended', function (data) {
-        console.log('Socket widget:info:sended');
+        $rootScope.log('Socket widget:info:sended');
 
         $scope.triggers = {};
 
@@ -704,7 +703,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
          *   }
          */
         socket.on('chat:created', function (data) {
-            console.log('Socket chat:created');
+            $rootScope.log('Socket chat:created');
 
             // Проверяем триггер
             checkTrigger($rootScope.c.TRIGGER_EVENT_WIDGET_CREATED);

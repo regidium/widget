@@ -77,7 +77,7 @@
                         ng-blur="messageBlur()"
                         ng-keyup="messageEdit($event)"
                         style="height: 52px;"
-                        placeholder="{{messagePlaceholder}}"
+                        placeholder="{{messagePlaceholder | translate}}"
                 ></textarea>
                 <!--<span ng-hide="focused" ng-click="focus()" class="info-text" translate>Write your message and press Enter</span>-->
             </form>

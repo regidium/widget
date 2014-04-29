@@ -13,23 +13,31 @@
 
         $routeProvider
             .when('/:uid', { templateUrl: 'js/app/main/views/index.html', controller: MainCtrl });
-            //.otherwise({ redirectTo: '/:uid' });
 
         $translateProvider.useStaticFilesLoader({
             prefix: 'js/app/main/translations/',
             suffix: '.json'
         });
 
-        $translateProvider.useMissingTranslationHandlerLog();
+        if (env == 'development') {
+            $translateProvider.useMissingTranslationHandlerLog();
+        }
 
         $translateProvider.useLocalStorage();
         $translateProvider.preferredLanguage('en');
     }]).run(function($rootScope, $cookieStore, $translate, config, socket) {
-        /** @todo форматировать языки (ru_RU в ru) */
+        $rootScope.env = env || 'production';
+
         var lang = navigator.browserLanguage || navigator.language || navigator.userLanguage;
         lang = lang.substring(0, 2);
         $rootScope.lang = lang;
         $translate.uses(lang);
+
+        $rootScope.log = function(text) {
+            if ($rootScope.env) {
+                console.log(text);
+            }
+        }
 
         // Получаем UID виджета
         $rootScope.widget_uid = $cookieStore.get('widget_uid');
