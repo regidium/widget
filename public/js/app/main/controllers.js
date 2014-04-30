@@ -214,8 +214,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
             $scope.chat.user = user_data;
             /** @todo Не готово */
-            //$scope.chat.referrer = document.referrer;
-            $scope.chat.current_url = document.location.href;
+            $scope.chat.referrer = document.referrer;
+            //$scope.chat.current_url = document.location.href;
 
             // Оповещаем о необходимости создать чат
             socket.emit('chat:create', {
