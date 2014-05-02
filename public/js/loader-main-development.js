@@ -4,6 +4,7 @@ head.load(
     // Common
     "/js/libs/json2/json2.js",
     "/js/libs/jquery/jquery.min.js",
+    "/js/libs/jquery/jquery-cookie/jquery-cookie.js",
     "/js/libs/underscore/underscore-min.js",
     "/js/libs/angular/angular.min.js",
     "/js/libs/angular/angular-route/angular-route.min.js",

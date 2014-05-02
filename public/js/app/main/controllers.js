@@ -3,7 +3,7 @@
 /**
  * @url "/widget"
  */
-function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sound) {
+function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document, socket, sound) {
     // ============================== Установка параметров ============================== //
     var soundChat = sound.init('chat');
     var soundBell = sound.init('bell');
@@ -55,13 +55,12 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     }
 
     /**
-     * Получение сообщений чата из sessionStorage
-     * @param sessionStorage
+     * Получение сообщений чата из localStorage
      *
      * @return array
      */
     function getMessages() {
-        var messages = sessionStorage.getItem('messages');
+        var messages = localStorage.getItem('messages.'+$rootScope.widget_uid);
 
         try {
             messages = JSON.parse(messages);
@@ -79,21 +78,21 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Скрытие виджета
      */
     function widgetHide() {
-        document.body.style.display = 'none';
+        $document[0].body.style.display = 'none';
     }
 
     /**
      * Отображение виджета
      */
     function widgetShow() {
-        document.body.style.display = 'block';
+        $document[0].body.style.display = 'block';
     }
 
     /**
      * Воспроизводим триггер
      */
     function runTrigger(trigger, cb) {
-        $rootScope.log('Run Trigger');
+        $log.debug('Run Trigger');
 
         if (trigger.result == $rootScope.c.TRIGGER_RESULT_MESSAGE_SEND) {
 
@@ -108,8 +107,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             // Добавляем сообщение в список сообщений
             $scope.chat.messages.push(message);
 
-            // Записываем сообщения в сессию
-            sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
+            // Записываем сообщения в хранилище
+            localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
 
             // Пролистываем до последнего сообщения
             scrollToBottom();
@@ -122,7 +121,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             // }
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_AGENTS_ALERT) {
             // @todo
-            $rootScope.log('Оповещаем агентов');
+            $log.debug('Оповещаем агентов');
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_OPEN) {
             // Открываем виджет
             if (!$scope.isOpened()) {
@@ -147,12 +146,12 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      */
     function checkTrigger(name) {
         if ($scope.triggers && $scope.triggers[name]) {
-            $rootScope.log('Check Trigger');
+            $log.debug('Check Trigger');
 
             var trigger = $scope.triggers[name];
 
             try {
-                var activated_triggers = sessionStorage.getItem('triggers');
+                var activated_triggers = localStorage.getItem('triggers.'+$rootScope.widget_uid);
                 activated_triggers = JSON.parse(activated_triggers);
                 if (!activated_triggers) {
                     activated_triggers = {};
@@ -168,7 +167,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
             // Запоминаем воспроизведенный триггер
             activated_triggers[trigger.uid] = true;
-            sessionStorage.setItem('triggers', JSON.stringify(activated_triggers));
+            localStorage.setItem('triggers.'+$rootScope.widget_uid, JSON.stringify(activated_triggers));
 
             if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
                 var triggerPromise = $timeout(function() { runTrigger(trigger, function(){ $timeout.cancel(triggerPromise); }) }, parseInt(trigger.event_params)*1000);
@@ -197,7 +196,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
                 cb(user_data);
             });
         } catch(e) {
-            $rootScope.log('Ошибка получения IP, страны, города');
+            $log.debug('Ошибка получения IP, страны, города');
             cb(user_data);
         }
     }
@@ -214,7 +213,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
             $scope.chat.user = user_data;
             /** @todo Не готово */
-            $scope.chat.referrer = document.referrer;
+            $scope.chat.referrer = $document[0].referrer;
             //$scope.chat.current_url = document.location.href;
 
             // Оповещаем о необходимости создать чат
@@ -230,7 +229,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      */
     function checkUrl() {
         // Получаем текущий URL
-        var current_url = document.referrer;
+        var current_url = $document[0].referrer;
         if ($cookieStore.get('url') != current_url) {
             // Оповещаем о смене URL
             socket.emit('chat:url:change', {
@@ -240,21 +239,24 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             });
         }
         // Сохраняем URL
-        $cookieStore.put('url', current_url);
+        $rootScope.setCookie('url', current_url);
+
     }
 
     /**
      * Прокрутка чата вниз
      */
     function scrollToBottom() {
-        $('#dialogue').animate({'scrollTop': $('#dialogue .content').height()}, 200);
+        //$('#dialogue').animate({'scrollTop': $('#dialogue .content').height()}, 200);
+        angular.element('#dialogue').animate({'scrollTop': angular.element('#dialogue .content').height()}, 200);
     }
 
     /**
      * Анимация блока авторизации
      */
     function chatAuthAnimation() {
-        $('#auth')
+        //$('#auth')
+        angular.element('#auth')
             .delay(500)
             .animate({left: "0px"}, 100)
             .animate({left: "18px"}, 100)
@@ -265,7 +267,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Анимиция виджета
      */
     function widgetBell() {
-        $('#container')
+        //$('#container')
+        angular.element('#container')
             .delay(500)
             .animate({marginLeft: "-5px"}, 80)
             .animate({marginLeft: "5px"}, 80)
@@ -279,7 +282,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Анимируем сообщения виджета
      */
     function widgetMessageBell() {
-        $('#dialogue .msg-content-arrow')
+        //$('#dialogue .msg-content-arrow')
+        angular.element('#dialogue .msg-content-arrow')
             .delay(500)
             .animate({marginRight: "-5px"}, 80)
             .animate({marginRight: "5px"}, 80)
@@ -304,8 +308,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         // Добавляем сообщение в список сообщений
         $scope.chat.messages.push(data.message);
 
-        // Записываем сообщения в сессию
-        sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
+        // Записываем сообщения в хранилище
+        localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
 
         // Пролистываем до последнего сообщения
         scrollToBottom();
@@ -331,8 +335,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         // Добавляем сообщение в список сообщений
         $scope.chat.messages.push(message);
 
-        // Записываем сообщения в сессию
-        sessionStorage.setItem('messages', JSON.stringify($scope.chat.messages));
+        // Записываем сообщения в хранилище
+        localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
 
         // Очищаем поле ввода сообщения
         $scope.text = '';
@@ -361,7 +365,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Страница меняется
      */
     $scope.$on('$locationChangeStart', function(event) {
-        $rootScope.log('AngularJS $locationChangeStart');
+        $log.debug('AngularJS $locationChangeStart');
 
         socket.emit('chat:page:change', {
             chat_uid: $scope.chat.uid,
@@ -391,7 +395,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * Отправка сообщения
      */
     $scope.sendMessage = function() {
-        $rootScope.log($scope.text);
         // Если виджет не открыт, тогда открываем его
         if (!$scope.isOpened()) {
             $scope.open();
@@ -416,7 +419,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         // Меняем статус чата на "В чате"
         if ($scope.chat.status != $rootScope.c.CHAT_STATUS_CHATTING) {
             $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
-            $cookieStore.put('chat', $scope.chat);
+            $rootScope.setCookie('chat', $scope.chat);
         }
     }
 
@@ -433,34 +436,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         if (charCode == 13 && !e.shiftKey) {
             $scope.sendMessage();
         }
-        // Если нажат ENTER
-        // if (charCode == 13) {
-        //     // Если виджет не открыт, тогда открываем его
-        //     if (!$scope.isOpened()) {
-        //         $scope.open();
-        //     }
-
-        //     // Блокируем отправку пустых сообщений
-        //     if ($scope.text.length == 0) {
-        //         return false;
-        //     };
-
-        //     // Обрботка триггера
-        //     checkTrigger($rootScope.c.TRIGGER_EVENT_WORD_SEND);
-        //     // Обрботка триггера
-        //     checkTrigger($rootScope.c.TRIGGER_EVENT_MESSAGE_SEND);
-
-        //     // Отправка сообщения
-        //     chatMessageSendUser($scope.text);
-
-        //     // Анимируем блок авторизации
-        //     chatAuthAnimation();
-
-        //     $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
-        //     $cookieStore.put('chat', $scope.chat);
-
-        //     return false;
-        // }
     }
 
     // Переключение режима виджета
@@ -488,10 +463,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         }
 
         // Запоминаем состояние чата
-        $cookieStore.put('opened', true);
+        $rootScope.setCookie('opened', true);
         $scope.opened = true;
 
-        $('#content').slideToggle(300);
+        //$('#content').slideToggle(300);
+        angular.element('#content').slideToggle(300);
 
         // Разворачиваем область ввода сообщения
         //$('#message-input textarea').animate({height: '55px'});
@@ -506,10 +482,11 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         }
 
         // Запоминаем состояние чата
-        $cookieStore.put('opened', false);
+        $rootScope.setCookie('opened', false);
         $scope.opened = false;
 
-        $('#content').slideToggle(300);
+        //$('#content').slideToggle(300);
+        angular.element('#content').slideToggle(300);
 
         // Анимация поля ввода сообщения
         //$('#message-input textarea').animate({height: '55px'});
@@ -520,9 +497,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
     // Активируем поле ввода сообщения
     $scope.focus = function() {
         $scope.focused = true;
-        //$('#message-input .message-input-content span').fadeOut(100);
-        //$('.message-input-content-bg').fadeIn(300);
-        //$('#message-input .message-input-content textarea').focus();
     }
 
     $scope.messageFocus = function() {
@@ -532,13 +506,13 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 
     $scope.messageBlur = function() {
         $scope.focused = false;
-        //$scope.messagePlaceholder = 'Write your message and press Enter';
     }
 
     // Авторизация
     $scope.authorization = function() {
         // Анимация формы авторизации
-        $('#auth').fadeOut(300);
+        //$('#auth').fadeOut(300);
+        angular.element('#auth').fadeOut(300);
         $scope.chat.user = getUserInfo();
         getUserInfo(function(user_data) {
             $scope.chat.user = user_data;
@@ -549,10 +523,10 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             chat.user.first_name = $scope.user.first_name;
             chat.user.email = $scope.user.email;
 
-            $cookieStore.put('chat', chat);
+            $rootScope.setCookie('chat', chat);
 
             $scope.auth = true;
-            $cookieStore.put('auth', true);
+            $rootScope.setCookie('auth', true);
 
             socket.emit('chat:user:auth', {
                 user: $scope.user,
@@ -573,7 +547,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:agent:enter', function (data) {
-        $rootScope.log('Socket chat:agent:enter');
+        $log.debug('Socket chat:agent:enter');
 
         // Фильтруем лишнее
         if ($scope.chat.uid == data.chat.uid) {
@@ -592,7 +566,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             $scope.chat.agent = data.agent;
             $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
 
-            $cookieStore.put('chat', $scope.chat);
+            $rootScope.setCookie('chat', $scope.chat);
         }
     });
 
@@ -605,7 +579,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:agent:leave', function (data) {
-        $rootScope.log('Socket chat:agent:leave');
+        $log.debug('Socket chat:agent:leave');
 
         // Фильтруем лишнее
         if ($scope.chat.uid == data.chat_uid) {
@@ -615,7 +589,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             delete $scope.chat.agent;
             //$scope.chat.status = $rootScope.c.CHAT_STATUS_ONLINE;
 
-            $cookieStore.put('chat', $scope.chat);
+            $rootScope.setCookie('chat', $scope.chat);
         }
     });
 
@@ -628,7 +602,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:message:send:agent', function (data) {
-        $rootScope.log('Socket chat:message:send:agent');
+        $log.debug('Socket chat:message:send:agent');
 
         // Убираем лишние
         if (data.chat_uid == $scope.chat.uid) {
@@ -645,7 +619,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      *   }
      */
     socket.on('chat:message:sended:agent', function (data) {
-        $rootScope.log('Socket chat:message:sended:agent');
+        $log.debug('Socket chat:message:sended:agent');
 
         // Убираем лишние
         if (data.chat_uid == $scope.chat.uid) {
@@ -664,7 +638,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
      * @param Object data
      */
     socket.on('widget:info:sended', function (data) {
-        $rootScope.log('Socket widget:info:sended');
+        $log.debug('Socket widget:info:sended');
 
         $scope.triggers = {};
 
@@ -703,7 +677,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
          *   }
          */
         socket.on('chat:created', function (data) {
-            $rootScope.log('Socket chat:created');
+            $log.debug('Socket chat:created');
 
             // Проверяем триггер
             checkTrigger($rootScope.c.TRIGGER_EVENT_WIDGET_CREATED);
@@ -715,19 +689,20 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
             // Заполняем переменную чат
             $scope.chat = data.chat;
             // Добавляем чат в cookie
-            $cookieStore.put('chat', data.chat)
+            $rootScope.setCookie('chat', data.chat)
             // Заполняем переменную сообщения чата
             $scope.chat.messages = [];
             // Запрашиваем информацию о виджете
             getWidgetInfo();
             // Добавляем статус чата в cookie (закрыт)
-            $cookieStore.put('opened', false);
+            $rootScope.setCookie('opened', false);
             $scope.opened = false;
             // Добавляем статус авторизации в cookie (не авторизирован)
-            $cookieStore.put('auth', false);
+            $rootScope.setCookie('auth', false);
             $scope.auth = false;
             // Сворачиваем виджет
-            $('#content').hide();
+            //$('#content').hide();
+            angular.element('#content').hide();
         });
     } else {
         // Заполняем переменную агент
@@ -745,7 +720,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         if ($scope.isOpened()) {
             $scope.open();
         } else {
-            $('#content').hide();
+            //$('#content').hide();
+            angular.element('#content').hide();
         }
 
         // Запрашиваем информацию о виджете
@@ -754,7 +730,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
         checkUrl();
     }
 
-    $(document).ready(function() {
+    $document.ready(function() {
         // Прокручиваем виджет к последнему сообщению
         scrollToBottom();
         // Скрытие рамки поля для ввода
@@ -766,7 +742,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, socket, sou
 //        });
 
         // Выезжание формы при открытии
-        $('#header').slideDown(350);
+        //$('#header').slideDown(350);
+        angular.element('#header').slideDown(350);
     });
 
 }
