@@ -48,7 +48,8 @@
         "morgan": "1.x",
         "jade": "1.x",
         "consolidate": "0.10.x",
-        "cookie": "0.1.x"
+        "cookie": "0.1.x",
+        "p3p": "x"
     },
     "os": ["linux"],
     "cpu": ["x64"],

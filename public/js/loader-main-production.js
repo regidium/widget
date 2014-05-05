@@ -2,9 +2,9 @@ var env = 'production';
 
 head.load(
     // Common
-    "/js/libs/json2/json2.js",
-    "//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js",
-    "/js/libs/jquery/jquery-cookie/jquery-cookie.js",
+    "//cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.min.js",
+    "//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js",
+    "//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js",
     "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js",
     "//ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js",
     "//ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular-route.min.js",
@@ -26,6 +26,7 @@ head.load(
     "/js/app/common/config/config.js",
     "/js/app/common/services.js",
     function() {
-        console.log("Done loading main JS");
+        console.log("Done loading main JS. Environment: "+env);
+        angular.bootstrap(document, ['regidiumApp']);
     }
 );

@@ -3,14 +3,14 @@ var env = 'development';
 head.load(
     // Common
     "/js/libs/json2/json2.js",
-    "/js/libs/jquery/jquery.min.js",
-    "/js/libs/jquery/jquery-cookie/jquery-cookie.js",
-    "/js/libs/underscore/underscore-min.js",
-    "/js/libs/angular/angular.min.js",
-    "/js/libs/angular/angular-route/angular-route.min.js",
-    "/js/libs/angular/angular-resource/angular-resource.min.js",
-    "/js/libs/angular/angular-cookies/angular-cookies.min.js",
-    "/js/libs/angular/angular-animate/angular-animate.min.js",
+    "/js/libs/jquery/jquery.js",
+    "/js/libs/jquery/jquery-cookie/jquery.cookie.min.js",
+    "/js/libs/underscore/underscore.js",
+    "/js/libs/angular/angular.js",
+    "/js/libs/angular/angular-route/angular-route.js",
+    "/js/libs/angular/angular-resource/angular-resource.js",
+    "/js/libs/angular/angular-cookies/angular-cookies.js",
+    "/js/libs/angular/angular-animate/angular-animate.js",
     "//j.maxmind.com/app/geoip.js",
     "/js/libs/angular/angular-translate/angular-translate.min.js",
     "/js/libs/angular/angular-translate/angular-translate-interpolation-messageformat/angular-translate-interpolation-messageformat.min.js",
@@ -26,6 +26,7 @@ head.load(
     "/js/app/common/config/config.js",
     "/js/app/common/services.js",
     function() {
-        console.log("Done loading main JS");
+        console.log("Done loading main JS. Environment: "+env);
+        angular.bootstrap(document, ['regidiumApp']);
     }
 );

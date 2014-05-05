@@ -1,5 +1,5 @@
 <div id="container" ng-class="{'open': opened, '': !opened}">
-    <div id="header" ng-style="{ 'background-color': settings.header_color }">
+    <div id="header" ng-style="{ 'background-color': settings.header_color }" style="{ 'background-color': settings.header_color }">
         <div class="status" ng-click="switch()" translate>Support Connected</div>
     </div>
     <div id="content">
@@ -76,8 +76,8 @@
                         ng-focus="messageFocus()"
                         ng-blur="messageBlur()"
                         ng-keyup="messageEdit($event)"
+                        ng-attr-placeholder="{{messagePlaceholder}}"
                         style="height: 52px;"
-                        placeholder="{{messagePlaceholder | translate}}"
                 ></textarea>
                 <!--<span ng-hide="focused" ng-click="focus()" class="info-text" translate>Write your message and press Enter</span>-->
             </form>

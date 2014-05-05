@@ -3,8 +3,11 @@
 /**
  * @url "/widget"
  */
-function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document, socket, sound) {
+function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document,  $routeParams, socket, sound) {
     // ============================== Установка параметров ============================== //
+    // Получаем UID виджета
+    $rootScope.widget_uid = $routeParams.uid;
+
     var soundChat = sound.init('chat');
     var soundBell = sound.init('bell');
 
@@ -33,7 +36,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
      * Получение данных пользователя из cookie
      */
     function getChat() {
-        var chat = $cookieStore.get('chat');
+        //var chat = $cookieStore.get('chat');
+        var chat = localStorage.getItem('chat.'+$rootScope.widget_uid);
+        chat = JSON.parse(chat);
         if (!chat) {
             chat = {};
         }
@@ -134,11 +139,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             widgetBell();
         }
 
-        //if (trigger.event == $rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE) {
-            if (cb) {
-                cb();
-            }
-        //}
+        if (cb) {
+            cb();
+        }
     }
 
     /**
@@ -230,7 +233,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
     function checkUrl() {
         // Получаем текущий URL
         var current_url = $document[0].referrer;
-        if ($cookieStore.get('url') != current_url) {
+        if (localStorage.getItem('url.'+$rootScope.widget_uid) != current_url) {
             // Оповещаем о смене URL
             socket.emit('chat:url:change', {
                 new_url: current_url,
@@ -238,8 +241,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
                 widget_uid: $rootScope.widget_uid
             });
         }
+        checkTrigger($rootScope.c.TRIGGER_EVENT_VISIT_PAGE, { current_url: current_url });
         // Сохраняем URL
-        $rootScope.setCookie('url', current_url);
+        localStorage.setItem('url.'+$rootScope.widget_uid, current_url);
 
     }
 
@@ -377,18 +381,21 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
      * Проверка открытости чата
      */
     $scope.isOpened = function() {
-        var opened = $cookieStore.get('opened');
-        if (!opened) {
+        //var opened = $cookieStore.get('opened');
+        var opened = localStorage.getItem('opened.'+$rootScope.widget_uid);
+        if (opened != 'true') {
             return false;
+        } else {
+            return true;
         }
-        return opened;
     }
 
     /**
      * Проверка статуса авторизации
      */
     $scope.isAuth = function() {
-        return $cookieStore.get('auth');
+        //return $cookieStore.get('auth');
+        return localStorage.getItem('auth.'+$rootScope.widget_uid);
     }
 
     /**
@@ -419,7 +426,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         // Меняем статус чата на "В чате"
         if ($scope.chat.status != $rootScope.c.CHAT_STATUS_CHATTING) {
             $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
-            $rootScope.setCookie('chat', $scope.chat);
+            //$rootScope.setCookie('chat', $scope.chat);
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
         }
     }
 
@@ -436,7 +444,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         if (charCode == 13 && !e.shiftKey) {
             $scope.sendMessage();
         }
-    }
+    };
 
     // Переключение режима виджета
     $scope.switch = function() {
@@ -446,11 +454,10 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         } else {
             $scope.close();
         }
-    }
+    };
 
     // Разворачиваем виджет
     $scope.open = function() {
-
         // Оповещаем сервер об открытии чата
         socket.emit('chat:open', {
             chat_uid: $scope.chat.uid,
@@ -463,7 +470,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         }
 
         // Запоминаем состояние чата
-        $rootScope.setCookie('opened', true);
+        //$rootScope.setCookie('opened', true);
+        localStorage.setItem('opened.'+$rootScope.widget_uid, true);
         $scope.opened = true;
 
         //$('#content').slideToggle(300);
@@ -475,14 +483,14 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
 
     // Сворачиваем виджет
     $scope.close = function() {
-
         // Обрабатываем триггер
         if ($scope.isOpened()) {
             checkTrigger($rootScope.c.TRIGGER_EVENT_CHAT_CLOSED);
         }
 
         // Запоминаем состояние чата
-        $rootScope.setCookie('opened', false);
+        //$rootScope.setCookie('opened', false);
+        localStorage.setItem('opened.'+$rootScope.widget_uid, false);
         $scope.opened = false;
 
         //$('#content').slideToggle(300);
@@ -523,10 +531,12 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             chat.user.first_name = $scope.user.first_name;
             chat.user.email = $scope.user.email;
 
-            $rootScope.setCookie('chat', chat);
+            //$rootScope.setCookie('chat', chat);
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify(chat));
 
             $scope.auth = true;
-            $rootScope.setCookie('auth', true);
+            //$rootScope.setCookie('auth', true);
+            localStorage.setItem('auth.'+$rootScope.widget_uid, true);
 
             socket.emit('chat:user:auth', {
                 user: $scope.user,
@@ -566,7 +576,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             $scope.chat.agent = data.agent;
             $scope.chat.status = $rootScope.c.CHAT_STATUS_CHATTING;
 
-            $rootScope.setCookie('chat', $scope.chat);
+            //$rootScope.setCookie('chat', $scope.chat);
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
         }
     });
 
@@ -589,7 +600,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             delete $scope.chat.agent;
             //$scope.chat.status = $rootScope.c.CHAT_STATUS_ONLINE;
 
-            $rootScope.setCookie('chat', $scope.chat);
+            //$rootScope.setCookie('chat', $scope.chat);
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
         }
     });
 
@@ -689,20 +701,25 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             // Заполняем переменную чат
             $scope.chat = data.chat;
             // Добавляем чат в cookie
-            $rootScope.setCookie('chat', data.chat)
+            //$rootScope.setCookie('chat', data.chat)
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify(data.chat));
             // Заполняем переменную сообщения чата
             $scope.chat.messages = [];
             // Запрашиваем информацию о виджете
             getWidgetInfo();
             // Добавляем статус чата в cookie (закрыт)
-            $rootScope.setCookie('opened', false);
+            //$rootScope.setCookie('opened', false);
+            localStorage.setItem('opened.'+$rootScope.widget_uid, false);
             $scope.opened = false;
             // Добавляем статус авторизации в cookie (не авторизирован)
-            $rootScope.setCookie('auth', false);
+            //$rootScope.setCookie('auth', false);
+            localStorage.setItem('auth.'+$rootScope.widget_uid, false);
             $scope.auth = false;
             // Сворачиваем виджет
             //$('#content').hide();
             angular.element('#content').hide();
+
+            checkUrl();
         });
     } else {
         // Заполняем переменную агент
@@ -717,7 +734,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         $scope.auth = $scope.isAuth();
 
         // Если виджет был развернут до обновления страницы, тогда раскрываем его
-        if ($scope.isOpened()) {
+        if ($scope.isOpened() != false) {
             $scope.open();
         } else {
             //$('#content').hide();

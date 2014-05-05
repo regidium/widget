@@ -36,43 +36,58 @@
 
                 // Создаем элемент блока виджета
                 this.widgetElement = document.createElement('div');
-                // Скрываем блок виджета
-                this.widgetElement.style.display = 'none';
                 // Стилизуем блок виджета
                 this.widgetElement.style.position = 'fixed';
+                this.widgetElement.style.bottom = options.bottom;
+                this.widgetElement.style.right = options.right;
                 this.widgetElement.style.minHeight = '35px';
                 this.widgetElement.style.maxHeight = '404px';
                 this.widgetElement.style.height = '100%';
                 this.widgetElement.style.width = '318px';
-                this.widgetElement.style.bottom = options.bottom;
-                this.widgetElement.style.right = options.right;
                 this.widgetElement.style.overflow = 'hidden';
                 this.widgetElement.style.zIndex = '2147483646';
                 this.widgetElement.setAttribute('id', options.widget_class);
                 this.widgetElement.setAttribute('class', options.widget_class);
 
+                var t = (new Date()).getTime();
+
                 // Создаем элемент iframe виджета
-                var iframeElement = document.createElement('iframe');
-                iframeElement.setAttribute('id', 'regidium_widget_iframe');
-                iframeElement.setAttribute('src', 'about:blank');
-                iframeElement.setAttribute('scrolling', 'no');
-                iframeElement.style.width = options.width;
-                iframeElement.style.height = options.height;
-                iframeElement.setAttribute('frameborder', '0');
+                this.iframeElement = document.createElement('iframe');
+                this.iframeElement.setAttribute('id', 'regidium_widget_iframe_'+t);
+                this.iframeElement.setAttribute('src', 'about:blank');
+                this.iframeElement.setAttribute('scrolling', 'no');
+                this.iframeElement.setAttribute('frameborder', '0');
+                this.iframeElement.setAttribute('allowTransparency', 'true');
+                this.iframeElement.style.backgroundColor = 'transparent';
+                this.iframeElement.style.width = options.width;
+                this.iframeElement.style.height = options.height;
+
                 // Подключаем iframe к блоку виджета
-                this.widgetElement.appendChild(iframeElement);
+                this.widgetElement.appendChild(this.iframeElement);
 
                 // Подключаем блок виджета к странице
                 document.body.insertBefore(this.widgetElement, document.body.nextSibling);
 
-                // Подключаем iframe к блоку виджета
-                iframeElement = document.getElementById('regidium_widget_iframe');
-                iframeElement.setAttribute('src', options.widget_url);
-                iframeElement.setAttribute('onload', Widget.show());
+                window.onload = function() {
+                    // Подключаем iframe к блоку виджета
+                    this.iframeElement = document.getElementById('regidium_widget_iframe_'+t);
+                    this.iframeElement.setAttribute('src', options.widget_url);
+                    //this.iframeElement.setAttribute('onload', function() { Widget.show(); });
+                    this.iframeElement.onload = function() { Widget.show(); };
+                };
             },
             show: function() {
                 this.created = true;
-                this.widgetElement.style.display = 'block';
+
+                // this.widgetElement.style.position = 'fixed';
+                // this.widgetElement.style.bottom = options.bottom;
+                // this.widgetElement.style.right = options.right;
+
+                // this.iframeElement.style.display = 'none';
+                // this.widgetElement.style.display = 'none';
+
+                // this.iframeElement.style.display = 'block';
+                // this.widgetElement.style.display = 'block';
             }
         }
 
