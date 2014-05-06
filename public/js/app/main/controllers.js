@@ -33,7 +33,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
 
     // ============================== Общие методы ==============================//
     /**
-     * Получение данных пользователя из cookie
+     * Получение данных чата из cookie
      */
     function getChat() {
         //var chat = $cookieStore.get('chat');
@@ -131,8 +131,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             // Открываем виджет
             if (!$scope.isOpened()) {
                 $scope.open();
-            // } else {
-            //     checkTrigger($rootScope.c.TRIGGER_EVENT_CHAT_OPENED);
+            } else {
+                checkTrigger($rootScope.c.TRIGGER_EVENT_CHAT_OPENED);
             }
         } else if (trigger.result == $rootScope.c.TRIGGER_RESULT_WIDGET_BELL) {
             // @Todo
@@ -217,7 +217,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             $scope.chat.user = user_data;
             /** @todo Не готово */
             $scope.chat.referrer = $document[0].referrer;
-            //$scope.chat.current_url = document.location.href;
+            $scope.chat.current_url = $document[0].referrer;
 
             // Оповещаем о необходимости создать чат
             socket.emit('chat:create', {
@@ -566,9 +566,23 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
                 $scope.open();
             }
 
-            data.agent.first_name = decodeURIComponent(data.agent.first_name);
-            data.agent.last_name = decodeURIComponent(data.agent.last_name);
-            data.agent.job_title = decodeURIComponent(data.agent.job_title);
+            if (data.agent.first_name) {
+                data.agent.first_name = decodeURIComponent(data.agent.first_name);
+            } else {
+                data.agent.first_name = '';
+            }
+
+            if (data.agent.last_name) {
+                data.agent.last_name = decodeURIComponent(data.agent.last_name);
+            } else {
+                data.agent.last_name = '';
+            }
+
+            if (data.agent.last_name) {
+                data.agent.job_title = decodeURIComponent(data.agent.job_title);
+            } else {
+                data.agent.job_title = '';
+            }
 
             // Заполняем переменную agent в $scope
             $scope.agent = data.agent;
@@ -724,6 +738,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
     } else {
         // Заполняем переменную агент
         $scope.agent = $scope.chat.agent;
+
+        // Получаем текущий URL чата
+        $scope.chat.current_url = $document[0].referrer;
         // Оповещаем о подключении чата
         socket.emit('chat:connect', {
             chat:       $scope.chat,

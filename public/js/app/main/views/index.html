@@ -5,15 +5,17 @@
     <div id="content">
         <div id="employee">
             <div ng-show="agent">
-                <div class="logo" style="max-height: 79px;"></div>
+                <div ng-show="settings" class="logo" style="max-height: 79px;">
+                    <img ng-show="settings.company_logo" ng-src="{{settings.company_logo}}" />
+                </div>
                 <div class="photo" style="max-height: 79px;">
-                    <img ng-src="{{agent.avatar}}" />
+                    <img ng-src="{{agent.avatar || '/img/user-photo-default.jpg'}}" style="max-height: 79px;" />
                 </div>
                 <div class="name">
-                    <div class="first-name" ng-bind="agent.first_name"></div>
-                    <div class="last-name" ng-bind="agent.last_name"></div>
+                    <div class="first-name" ng-bind="agent.first_name || ''"></div>
+                    <div class="last-name" ng-bind="agent.last_name || ''"></div>
                 </div>
-                <div class="post">{{chat.agent.job_title}}</div>
+                <div ng-show="agent.job_title" class="post">{{agent.job_title || ''}}</div>
             </div>
         </div>
         <div id="dialogue">
@@ -44,7 +46,7 @@
                             <div class="msg-content-arrow">
                                 <div class="msg-content-text">
                                     <div class="msg-date">{{message.created_at * 1000 | date:'shortTime' }}</div>
-                                    <div class="msg-user">{{chat.agent.first_name}}</div>
+                                    <div class="msg-user">{{agent.first_name || ''}}</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
                             </div>
@@ -60,7 +62,7 @@
                             <div class="msg-content-arrow">
                                 <div class="msg-content-text">
                                     <div class="msg-date">{{message.created_at | date:'shortTime' }}</div>
-                                    <div class="msg-user">Robot</div>
+                                    <div class="msg-user" translate>Robot</div>
                                     <div class="msg-text">{{message.text}}</div>
                                 </div>
                             </div>

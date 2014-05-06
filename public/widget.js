@@ -24,7 +24,6 @@
         }, config);
         // Заполняем параметры
         options.widget_url = [Util.proto, options.domain, '/', options.uid].join('');
-        //options.widget_url += '#' + encodeURIComponent(document.location.href);
 
         Widget = {
             created: false,
@@ -72,22 +71,11 @@
                     // Подключаем iframe к блоку виджета
                     this.iframeElement = document.getElementById('regidium_widget_iframe_'+t);
                     this.iframeElement.setAttribute('src', options.widget_url);
-                    //this.iframeElement.setAttribute('onload', function() { Widget.show(); });
                     this.iframeElement.onload = function() { Widget.show(); };
                 };
             },
             show: function() {
                 this.created = true;
-
-                // this.widgetElement.style.position = 'fixed';
-                // this.widgetElement.style.bottom = options.bottom;
-                // this.widgetElement.style.right = options.right;
-
-                // this.iframeElement.style.display = 'none';
-                // this.widgetElement.style.display = 'none';
-
-                // this.iframeElement.style.display = 'block';
-                // this.widgetElement.style.display = 'block';
             }
         }
 
