@@ -191,17 +191,30 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         user_data.language = $rootScope.lang;
         // Получаем IP, страну, город пользователя
         try {
-            user_data.country = geoip_country_name();
-            user_data.city = geoip_city();
-            // Определяем IP пользователя
-            $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
+            $http.jsonp('http://api.sypexgeo.net/jsonp/?callback=JSON_CALLBACK').success(function(data) {
+                // @todo можно определять timezone (http://sypexgeo.net/ru/api/)
                 user_data.ip = data.ip;
+                user_data.country = data.country.name_en;
+                user_data.city = data.city.name_en;
                 cb(user_data);
             });
         } catch(e) {
             $log.debug('Ошибка получения IP, страны, города');
             cb(user_data);
         }
+        // var user_data = {};
+        // try {
+        //     user_data.country = geoip_country_name();
+        //     user_data.city = geoip_city();
+        //     // Определяем IP пользователя
+        //     $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
+        //         user_data.ip = data.ip;
+        //         cb(user_data);
+        //     });
+        // } catch(e) {
+        //     $log.debug('Ошибка получения IP, страны, города');
+        //     cb(user_data);
+        // }
     }
 
     /**

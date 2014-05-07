@@ -11,7 +11,6 @@ head.load(
     "//ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular-resource.min.js",
     "//ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular-cookies.min.js",
     "//ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular-animate.min.js",
-    "//j.maxmind.com/app/geoip.js",
     "/js/libs/angular/angular-translate/angular-translate.min.js",
     "/js/libs/angular/angular-translate/angular-translate-interpolation-messageformat/angular-translate-interpolation-messageformat.min.js",
     "/js/libs/angular/angular-translate/angular-translate-storage-cookie/angular-translate-storage-cookie.min.js",
