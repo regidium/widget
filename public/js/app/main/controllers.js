@@ -3,7 +3,7 @@
 /**
  * @url "/widget"
  */
-function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document,  $routeParams, socket, sound) {
+function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document,  $routeParams, $filter, socket, sound) {
     // ============================== Установка параметров ============================== //
     // Получаем UID виджета
     $rootScope.widget_uid = $routeParams.uid;
@@ -513,6 +513,10 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         //$('#message-input textarea').animate({height: '55px'});
         // Текст в поле
         //setTimeout("$('#message-input .message-input-content span').delay(1000);", 300);
+
+        $scope.chat.opened = false;
+        $scope.chat.status = $rootScope.CHAT_STATUS_ONLINE;
+        localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
     }
 
     // Активируем поле ввода сообщения
@@ -627,7 +631,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             delete $scope.chat.agent;
             //$scope.chat.status = $rootScope.c.CHAT_STATUS_ONLINE;
 
-            //$rootScope.setCookie('chat', $scope.chat);
             localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
         }
     });
@@ -682,7 +685,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         $scope.triggers = {};
 
         if (data.triggers) {
-            _.each(data.triggers, function(trigger) {
+            var triggers = $filter('orderBy')(data.triggers, 'priority', false);
+            _.each(triggers, function(trigger) {
                 $scope.triggers[trigger.event] = trigger;
             });
         }
@@ -694,6 +698,25 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
 
         // Проверяем триггер
         checkTrigger($rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE);
+    });
+
+    /**
+     * Чат был закрыт
+     * @param Object data = {
+     *    string chat_uid
+     *    string widget_uid
+     * }
+     */
+    socket.on('chat:closed', function (data) {
+        $log.debug('Socket chat:closed');
+
+        // Отсеиваем чужие
+        if($scope.chat.uid == data.chat_uid) {
+            // Закрываем виджет
+            if ($scope.isOpened()) {
+                $scope.close();
+            }
+        }
     });
 
     // ============================================================================= //
