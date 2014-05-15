@@ -3,7 +3,7 @@
 /**
  * @url "/widget"
  */
-function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document,  $routeParams, $filter, socket, sound) {
+function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document, $routeParams, $filter, $translate, socket, sound) {
     // ============================== Установка параметров ============================== //
     // Получаем UID виджета
     $rootScope.widget_uid = $routeParams.uid;
@@ -698,6 +698,9 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
 
         // Проверяем триггер
         checkTrigger($rootScope.c.TRIGGER_EVENT_TIME_ONE_PAGE);
+
+        // Прокручиваем виджет к последнему сообщению
+        scrollToBottom();
     });
 
     /**
@@ -712,10 +715,61 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
 
         // Отсеиваем чужие
         if($scope.chat.uid == data.chat_uid) {
-            // Закрываем виджет
-            if ($scope.isOpened()) {
-                $scope.close();
+            delete $scope.agent;
+            delete $scope.chat.agent;
+
+            var message = {
+                created_at: (+new Date) / 1000,
+                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
+                text: $translate('Agent ended dialogue')
             }
+
+            // @todo использовать метод
+            // @todo записывать в БД
+            // Добавляем сообщение в список сообщений
+            $scope.chat.messages.push(message);
+
+            // Записываем сообщения в хранилище
+            localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
+
+            // Записываем чат в хранилище
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
+            // Закрываем виджет
+            // if ($scope.isOpened()) {
+            //     $scope.close();
+            // }
+        }
+    });
+
+    /**
+     * Агент вышел
+     * @param Object data = {
+     *    string agent_uid
+     *    string widget_uid
+     * }
+     */
+    socket.on('agent:disconnected', function (data) {
+        $log.debug('Socket agent:disconnected');
+
+        // Отсеиваем чужие
+        if($scope.agent && $scope.agent.uid == data.agent_uid) {
+            delete $scope.agent;
+            delete $scope.chat.agent;
+
+            var message = {
+                created_at: (+new Date) / 1000,
+                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
+                text: $translate('Agent offline')
+            }
+
+            // Добавляем сообщение в список сообщений
+            $scope.chat.messages.push(message);
+
+            // Записываем сообщения в хранилище
+            localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
+
+            // Записываем чат в хранилище
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
         }
     });
 
@@ -801,8 +855,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
     }
 
     $document.ready(function() {
-        // Прокручиваем виджет к последнему сообщению
-        scrollToBottom();
         // Скрытие рамки поля для ввода
 //        $(document).mouseup(function (e) {
 //            // Если нажатие было вне блока ввода сообщения
