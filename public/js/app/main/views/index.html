@@ -5,11 +5,11 @@
     <div id="content">
         <div id="employee">
             <div ng-show="agent">
-                <div ng-show="settings" class="logo" style="max-height: 79px;">
-                    <img ng-show="settings.company_logo" ng-src="{{settings.company_logo}}" />
+                <div ng-show="settings" class="logo" style="max-height: 71px;">
+                    <img ng-show="settings.company_logo" ng-src="{{settings.company_logo}}?width=71&height=71" style="max-height: 71px; max-width: 71px;" />
                 </div>
                 <div class="photo" style="max-height: 79px;">
-                    <img ng-src="{{agent.avatar || '/img/user-photo-default.jpg'}}" style="max-height: 79px;" />
+                    <img ng-src="{{agent.avatar + '?width=79&height=79' || '/img/user-photo-default.jpg'}}" style="max-height: 79px; max-width: 79px;" />
                 </div>
                 <div class="name">
                     <div class="first-name" ng-bind="agent.first_name || ''"></div>
@@ -33,14 +33,14 @@
                             </div>
                         </div>
                         <div class="msg-photo">
-                            <img ng-src="{{user.avatar || '/img/user-photo-default.jpg'}}" width="39px" height="39px" />
+                            <img ng-src="{{user.avatar + '?width=90&height=90' || '/img/user-photo-default.jpg'}}" style="max-height: 39px;  max-width: 39px;" />
                         </div>
                     </div>
 
                     <!-- Сообщение от оператора -->
                     <div ng-if="message.sender_type == c.MESSAGE_SENDER_TYPE_AGENT">
                         <div class="msg-photo">
-                            <img ng-src="{{agent.avatar || '/img/user-photo-default.jpg'}}" width="39px" height="39px" />
+                            <img ng-src="{{agent.avatar + '?width=90&height=90' || '/img/user-photo-default.jpg'}}" style="max-height: 39px;  max-width: 39px;" />
                         </div>
                         <div class="msg-content">
                             <div class="msg-content-arrow">
