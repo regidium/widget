@@ -47,6 +47,7 @@
                 this.widgetElement.style.zIndex = '2147483646';
                 this.widgetElement.setAttribute('id', options.widget_class);
                 this.widgetElement.setAttribute('class', options.widget_class);
+                this.widgetElement.setAttribute('allowtransparency', true);
 
                 var t = (new Date()).getTime();
 
