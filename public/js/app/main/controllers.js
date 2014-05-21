@@ -490,6 +490,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         //$('#content').slideToggle(300);
         angular.element('#content').slideToggle(300);
 
+        window.parent.postMessage('opened', '*');
+
         // Разворачиваем область ввода сообщения
         //$('#message-input textarea').animate({height: '55px'});
     }
@@ -517,6 +519,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         $scope.chat.opened = false;
         $scope.chat.status = $rootScope.CHAT_STATUS_ONLINE;
         localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
+        window.parent.postMessage('closed', '*');
     }
 
     // Активируем поле ввода сообщения
