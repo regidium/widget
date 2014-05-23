@@ -93,9 +93,9 @@
         var data = e.data;
         var origin = e.origin;
 
-        if (origin !== 'http://my.regidium.com') {
-            return;
-        }
+        // if (origin !== 'http://my.regidium.com') {
+        //     return;
+        // }
 
         if (data == 'opened') {
             Widget.widgetElement.style.height = '100%';
