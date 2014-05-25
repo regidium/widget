@@ -3,7 +3,7 @@
 /**
  * @url "/widget"
  */
-function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $document, $routeParams, $filter, $translate, socket, sound) {
+function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routeParams, $filter, $translate, socket, sound) {
     // ============================== Установка параметров ============================== //
     // Получаем UID виджета
     $rootScope.widget_uid = $routeParams.uid;
@@ -36,7 +36,6 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
      * Получение данных чата из cookie
      */
     function getChat() {
-        //var chat = $cookieStore.get('chat');
         var chat = localStorage.getItem('chat.'+$rootScope.widget_uid);
         chat = JSON.parse(chat);
         if (!chat) {
@@ -105,7 +104,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
                 created_at: (+new Date) / 1000,
                 sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
                 text: trigger.result_params
-            }
+            };
 
             // @todo использовать метод
             // @todo записывать в БД
@@ -394,22 +393,16 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
      * Проверка открытости чата
      */
     $scope.isOpened = function() {
-        //var opened = $cookieStore.get('opened');
         var opened = localStorage.getItem('opened.'+$rootScope.widget_uid);
-        if (opened != 'true') {
-            return false;
-        } else {
-            return true;
-        }
-    }
+        return opened == 'true';
+    };
 
     /**
      * Проверка статуса авторизации
      */
     $scope.isAuth = function() {
-        //return $cookieStore.get('auth');
         return localStorage.getItem('auth.'+$rootScope.widget_uid);
-    }
+    };
 
     /**
      * Отправка сообщения
@@ -423,7 +416,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         // Блокируем отправку пустых сообщений
         if ($scope.text.length == 0) {
             return false;
-        };
+        }
 
         // Обрботка триггера
         checkTrigger($rootScope.c.TRIGGER_EVENT_WORD_SEND);
@@ -442,7 +435,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
             //$rootScope.setCookie('chat', $scope.chat);
             localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
         }
-    }
+    };
 
     // Нажатие клавиш в поле ввода сообщения
     $scope.messageEdit = function(e) {
@@ -494,7 +487,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
 
         // Разворачиваем область ввода сообщения
         //$('#message-input textarea').animate({height: '55px'});
-    }
+    };
 
     // Сворачиваем виджет
     $scope.close = function() {
@@ -520,21 +513,21 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
         $scope.chat.status = $rootScope.CHAT_STATUS_ONLINE;
         localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
         window.parent.postMessage('closed', '*');
-    }
+    };
 
     // Активируем поле ввода сообщения
     $scope.focus = function() {
         $scope.focused = true;
-    }
+    };
 
     $scope.messageFocus = function() {
         $scope.focused = true;
         $scope.messagePlaceholder = '';
-    }
+    };
 
     $scope.messageBlur = function() {
         $scope.focused = false;
-    }
+    };
 
     // Авторизация
     $scope.authorization = function() {
@@ -564,7 +557,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
                 widget_uid: $rootScope.widget_uid
             });
         });
-    }
+    };
 
     // ================================= Socket.IO ================================== //
 
@@ -685,6 +678,8 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
     socket.on('widget:info:sended', function (data) {
         $log.debug('Socket widget:info:sended', data);
 
+        window.parent.postMessage('started', '*');
+
         $scope.triggers = {};
 
         if (data.triggers) {
@@ -725,7 +720,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
                 created_at: (+new Date) / 1000,
                 sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
                 text: $translate('Agent ended dialogue')
-            }
+            };
 
             // @todo использовать метод
             // @todo записывать в БД
@@ -763,7 +758,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
                 created_at: (+new Date) / 1000,
                 sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
                 text: $translate('Agent offline')
-            }
+            };
 
             // Добавляем сообщение в список сообщений
             $scope.chat.messages.push(message);

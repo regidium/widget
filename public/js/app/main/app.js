@@ -64,8 +64,6 @@
         $rootScope.c.MESSAGE_SENDER_TYPE_USER = 1;
         $rootScope.c.MESSAGE_SENDER_TYPE_AGENT = 2;
         $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT = 3;
-
-        window.parent.postMessage('started', '*');
     });
 
 })(angular);

@@ -35,6 +35,7 @@
 
                 // Создаем элемент блока виджета
                 this.widgetElement = document.createElement('div');
+                this.widgetElement.style.display = 'none';
                 // Стилизуем блок виджета
                 this.widgetElement.style.position = 'fixed';
                 this.widgetElement.style.bottom = options.bottom;
@@ -74,12 +75,13 @@
                     this.iframeElement = document.getElementById('regidium_widget_iframe_' + t);
                     this.iframeElement.setAttribute('src', options.widget_url);
                     this.iframeElement.onload = function () {
-                        Widget.show();
+                        //Widget.show();
                     };
                 };
             },
             show: function () {
                 this.created = true;
+                this.widgetElement.style.display = 'block';
             }
         }
 
@@ -98,7 +100,10 @@
 //            return;
 //        }
 
-        if (data == 'opened') {
+
+        if (data == 'started') {
+            Widget.show();
+        } else if (data == 'opened') {
             Widget.widgetElement.style.height = '100%';
         } else if (data == 'closed') {
             setTimeout(function() {
