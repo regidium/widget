@@ -683,7 +683,7 @@ function MainCtrl($rootScope, $scope, $http, $cookieStore, $timeout, $log, $docu
      * @param Object data
      */
     socket.on('widget:info:sended', function (data) {
-        $log.debug('Socket widget:info:sended');
+        $log.debug('Socket widget:info:sended', data);
 
         $scope.triggers = {};
 

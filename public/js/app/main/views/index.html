@@ -6,10 +6,11 @@
         <div id="employee">
             <div ng-show="agent">
                 <div ng-show="settings" class="logo" style="max-height: 71px;">
-                    <img ng-show="settings.company_logo" ng-src="{{settings.company_logo}}?width=71&height=71" style="max-height: 71px; max-width: 71px;" />
+                    <img ng-if="settings.company_logo" ng-src="{{settings.company_logo + '?width=71&height=71'}}" style="max-height: 71px; max-width: 71px;" />
                 </div>
                 <div class="photo" style="max-height: 79px;">
-                    <img ng-src="{{agent.avatar + '?width=79&height=79' || '/img/user-photo-default.jpg'}}" style="max-height: 79px; max-width: 79px;" />
+                    <img ng-if="agent.avatar" ng-src="{{agent.avatar + '?width=79&height=79'}}" style="max-height: 79px; max-width: 79px;" />
+                    <img ng-if="!agent.avatar" ng-src="{{agent.avatar}}" style="max-height: 79px; max-width: 79px;" />
                 </div>
                 <div class="name">
                     <div class="first-name" ng-bind="agent.first_name || ''"></div>

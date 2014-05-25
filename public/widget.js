@@ -93,15 +93,16 @@
         var data = e.data;
         var origin = e.origin;
 
-        if (origin !== 'http://my.regidium.com') {
-            return;
-        }
+// @todo security
+//        if (origin !== 'http://my.regidium.com') {
+//            return;
+//        }
 
         if (data == 'opened') {
             Widget.widgetElement.style.height = '100%';
         } else if (data == 'closed') {
             setTimeout(function() {
-                Widget.widgetElement.style.height = 'initial';
+                Widget.widgetElement.style.removeProperty('height');
             }, 300)
         }
     };
