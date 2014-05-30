@@ -1,6 +1,6 @@
 <div id="container" ng-class="{'open': opened, '': !opened}">
     <div id="header" ng-style="{ 'background-color': settings.header_color }" style="{ 'background-color': settings.header_color }">
-        <div class="status" ng-click="switch()" translate>Support Connected</div>
+        <div class="status" ng-click="switch()" ng-bind="settings.title_offline"></div>
     </div>
     <div id="content">
         <div id="employee">
@@ -34,13 +34,14 @@
                             </div>
                         </div>
                         <div class="msg-photo">
-                            <img ng-src="{{user.avatar || '/img/user-photo-default.jpg'}}?width=90&height=90" style="max-height: 39px;  max-width: 39px;" />
+                            <img ng-src="{{user.avatar || '/img/user-photo-default.jpg'}}" style="max-height: 39px;  max-width: 39px;" />
                         </div>
                     </div>
+
                     <!-- Сообщение от оператора -->
                     <div ng-if="message.sender_type == c.MESSAGE_SENDER_TYPE_AGENT">
                         <div class="msg-photo">
-                            <img ng-src="{{agent.avatar || '/img/user-photo-default.jpg'}}?width=90&height=90" style="max-height: 39px;  max-width: 39px;" />
+                            <img ng-src="{{agent.avatar + '?width=90&height=90' || '/img/user-photo-default.jpg'}}" style="max-height: 39px;  max-width: 39px;" />
                         </div>
                         <div class="msg-content">
                             <div class="msg-content-arrow">

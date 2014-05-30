@@ -690,6 +690,10 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
         }
 
         $scope.settings = data.settings;
+        if (data.settings && data.settings.language && data.settings.language != 'auto') {
+            $rootScope.lang = data.settings.language;
+            $translate.uses(data.settings.language);
+        }
 
         // Отображаем виджет
         widgetShow();
