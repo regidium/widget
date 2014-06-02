@@ -227,8 +227,7 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
             user_data.email = '';
 
             $scope.chat.user = user_data;
-            /** @todo Не готово */
-            $scope.chat.referrer = $document[0].referrer;
+
             $scope.chat.current_url = $document[0].referrer;
 
             // Оповещаем о необходимости создать чат
@@ -868,6 +867,29 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
         // Выезжание формы при открытии
         //$('#header').slideDown(350);
         angular.element('#header').slideDown(350);
-    });
 
+        var onmessage = function (e) {
+            $log.debug('onmessage', e);
+            try {
+                var data = JSON.parse(e.data);
+
+                if (data.referrer) {
+                    // Оповещаем о referrer
+                    socket.emit('chat:referrer:change', {
+                        referrer: data.referrer,
+                        chat_uid: $scope.chat.uid,
+                        widget_uid: $rootScope.widget_uid
+                    });
+                }
+            } catch (e) {
+                $log.debug(e);
+            }
+        };
+
+        if (typeof window.addEventListener != 'undefined') {
+            window.addEventListener('message', onmessage, false);
+        } else if (typeof window.attachEvent != 'undefined') {
+            window.attachEvent('onmessage', onmessage);
+        }
+    });
 }
