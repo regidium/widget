@@ -694,7 +694,7 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
             $translate.uses(data.settings.language);
         }
 
-        explanatory_message
+        $scope.messagePlaceholder = $scope.settings.explanatory_message;
 
         // Отображаем виджет
         widgetShow();
