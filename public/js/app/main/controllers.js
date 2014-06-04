@@ -29,7 +29,7 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     // Резервируем в $scope переменную авторизационных данных пользователя
     $scope.user = { first_name: '', email: '' };
 
-    $scope.messagePlaceholder = 'Write your message and press Enter';
+    $scope.messagePlaceholder = $translate('Write your message and press Enter');
 
     // ============================== Общие методы ==============================//
     /**
@@ -693,6 +693,8 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
             $rootScope.lang = data.settings.language;
             $translate.uses(data.settings.language);
         }
+
+        explanatory_message
 
         // Отображаем виджет
         widgetShow();
