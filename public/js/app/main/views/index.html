@@ -1,6 +1,6 @@
 <div id="container" ng-class="{'open': opened, '': !opened}">
     <div id="header" ng-style="{ 'background-color': settings.header_color }" style="{ 'background-color': settings.header_color }">
-        <div class="status" ng-click="switch()" ng-bind="settings.title_offline"></div>
+        <div class="status" ng-click="switching()" ng-bind="settings.title_offline"></div>
     </div>
     <div id="content">
         <div id="employee">
@@ -9,8 +9,7 @@
                     <img ng-if="settings.company_logo" ng-src="{{settings.company_logo + '?width=71&height=71'}}" style="max-height: 71px; max-width: 71px;" />
                 </div>
                 <div class="photo" style="max-height: 79px;">
-                    <img ng-if="agent.avatar" ng-src="{{agent.avatar + '?width=79&height=79'}}" style="max-height: 79px; max-width: 79px;" />
-                    <img ng-if="!agent.avatar" ng-src="{{agent.avatar}}" style="max-height: 79px; max-width: 79px;" />
+                    <img ng-src="{{agent.avatar || '/img/agent-photo-default.png'}}?width=79&height=79" height="79px" width="79px" style="max-height: 79px; max-width: 79px;" />
                 </div>
                 <div class="name">
                     <div class="first-name" ng-bind="agent.first_name || ''"></div>
@@ -41,7 +40,7 @@
                     <!-- Сообщение от оператора -->
                     <div ng-if="message.sender_type == c.MESSAGE_SENDER_TYPE_AGENT">
                         <div class="msg-photo">
-                            <img ng-src="{{agent.avatar + '?width=90&height=90' || '/img/user-photo-default.jpg'}}" style="max-height: 39px;  max-width: 39px;" />
+                            <img ng-src="{{agent.avatar || '/img/agent-photo-default.png'}}?width=90&height=90" style="max-height: 39px;  max-width: 39px;" />
                         </div>
                         <div class="msg-content">
                             <div class="msg-content-arrow">

@@ -201,19 +201,6 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
             $log.debug('Ошибка получения IP, страны, города');
             cb(user_data);
         }
-        // var user_data = {};
-        // try {
-        //     user_data.country = geoip_country_name();
-        //     user_data.city = geoip_city();
-        //     // Определяем IP пользователя
-        //     $http.jsonp('http://ipinfo.io/?callback=JSON_CALLBACK').success(function(data) {
-        //         user_data.ip = data.ip;
-        //         cb(user_data);
-        //     });
-        // } catch(e) {
-        //     $log.debug('Ошибка получения IP, страны, города');
-        //     cb(user_data);
-        // }
     }
 
     /**
@@ -379,7 +366,7 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
      * @todo Проверить необходиость для NotSinglePage
      * Страница меняется
      */
-    $scope.$on('$locationChangeStart', function(event) {
+    $scope.$on('$locationChangeStart', function() {
         $log.debug('AngularJS $locationChangeStart');
 
         socket.emit('chat:page:change', {
@@ -452,7 +439,7 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     };
 
     // Переключение режима виджета
-    $scope.switch = function() {
+    $scope.switching = function() {
         // Если виджет уже раскрыт, тогда сворачиваем его
         if (!$scope.isOpened()) {
             $scope.open();
@@ -694,7 +681,9 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
             $translate.uses(data.settings.language);
         }
 
-        $scope.messagePlaceholder = $scope.settings.explanatory_message;
+        if (data.settings && data.settings.explanatory_message) {
+            $scope.messagePlaceholder = data.settings.explanatory_message;
+        }
 
         // Отображаем виджет
         widgetShow();
@@ -847,7 +836,6 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
         if ($scope.isOpened() != false) {
             $scope.open();
         } else {
-            //$('#content').hide();
             angular.element('#content').hide();
         }
 
@@ -858,20 +846,11 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     }
 
     $document.ready(function() {
-        // Скрытие рамки поля для ввода
-//        $(document).mouseup(function (e) {
-//            // Если нажатие было вне блока ввода сообщения
-//            if ($(".message-input-content").has(e.target).length === 0) {
-//                $(".message-input-content-bg").fadeOut(300);
-//            }
-//        });
-
-        // Выезжание формы при открытии
-        //$('#header').slideDown(350);
         angular.element('#header').slideDown(350);
 
         var onmessage = function (e) {
-            $log.debug('onmessage', e);
+            $log.debug('onmessage');
+
             try {
                 var data = JSON.parse(e.data);
 

@@ -35,7 +35,6 @@
         var lang = navigator.browserLanguage || navigator.language || navigator.userLanguage;
         lang = lang.substring(0, 2);
         $rootScope.lang = lang;
-        //$translate.uses(lang);
 
         // Константы
         $rootScope.c = {};
