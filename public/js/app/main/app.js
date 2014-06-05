@@ -62,7 +62,8 @@
 
         $rootScope.c.MESSAGE_SENDER_TYPE_USER = 1;
         $rootScope.c.MESSAGE_SENDER_TYPE_AGENT = 2;
-        $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT = 3;
+        $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT_TO_USER = 3;
+        $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT_TO_AGENT = 4;
     });
 
 })(angular);

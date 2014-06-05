@@ -102,20 +102,16 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
 
             var message = {
                 created_at: (+new Date) / 1000,
-                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
+                readed: true,
+                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT_TO_USER,
                 text: trigger.result_params
             };
 
-            // @todo использовать метод
-            // @todo записывать в БД
-            // Добавляем сообщение в список сообщений
-            $scope.chat.messages.push(message);
-
-            // Записываем сообщения в хранилище
-            localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
-
-            // Пролистываем до последнего сообщения
-            scrollToBottom();
+            socket.emit('chat:message:send:robot', {
+                message: message,
+                chat: $scope.chat,
+                widget_uid: $rootScope.widget_uid
+            });
 
             // Открываем виджет
             // if (!$scope.isOpened()) {
@@ -329,9 +325,9 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
 
         // Оповещаем об отправке сообщения
         socket.emit('chat:message:send:user', {
-            widget_uid: $rootScope.widget_uid,
+            message: message,
             chat: $scope.chat,
-            message: message
+            widget_uid: $rootScope.widget_uid
         });
 
         // Добавляем сообщение в список сообщений
@@ -614,6 +610,19 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
             //$scope.chat.status = $rootScope.c.CHAT_STATUS_ONLINE;
 
             localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
+
+            var message = {
+                created_at: (+new Date) / 1000,
+                readed: true,
+                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT_TO_USER,
+                text: $translate('Agent leave chat')
+            };
+
+            socket.emit('chat:message:send:robot', {
+                message: message,
+                chat_uid: $scope.chat.uid,
+                widget_uid: $rootScope.widget_uid
+            });
         }
     });
 
@@ -654,6 +663,34 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
                 chat_uid: data.chat_uid,
                 widget_uid: $rootScope.widget_uid
             });
+        }
+    });
+
+    /**
+     * Робот прислал сообщение
+     * @param Object data = {
+     *       Object message
+     *       string chat_uid
+     *       string widget_uid
+     *   }
+     */
+    socket.on('chat:message:sended:robot', function (data) {
+        $log.debug('Socket chat:message:sended:robot');
+
+        // Убираем лишние
+        if (data.chat_uid == $scope.chat.uid) {
+            // @todo использовать метод
+            // Добавляем сообщение в список сообщений
+            $scope.chat.messages.push(data.message);
+
+            // Записываем сообщения в хранилище
+            localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
+
+            // Записываем чат в хранилище
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
+
+            // Пролистываем до последнего сообщения
+            scrollToBottom();
         }
     });
 
@@ -710,26 +747,23 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
             delete $scope.agent;
             delete $scope.chat.agent;
 
+            $scope.chat.closed = true;
+            $scope.chat.status = $rootScope.c.CHAT_STATUS_ONLINE;
+
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify(data.chat));
+
             var message = {
                 created_at: (+new Date) / 1000,
-                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
+                readed: true,
+                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT_TO_USER,
                 text: $translate('Agent ended dialogue')
             };
 
-            // @todo использовать метод
-            // @todo записывать в БД
-            // Добавляем сообщение в список сообщений
-            $scope.chat.messages.push(message);
-
-            // Записываем сообщения в хранилище
-            localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
-
-            // Записываем чат в хранилище
-            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
-            // Закрываем виджет
-            // if ($scope.isOpened()) {
-            //     $scope.close();
-            // }
+            socket.emit('chat:message:send:robot', {
+                message: message,
+                chat_uid: $scope.chat.uid,
+                widget_uid: $rootScope.widget_uid
+            });
         }
     });
 
@@ -750,18 +784,16 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
 
             var message = {
                 created_at: (+new Date) / 1000,
-                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT,
+                readed: true,
+                sender_type: $rootScope.c.MESSAGE_SENDER_TYPE_ROBOT_TO_USER,
                 text: $translate('Agent offline')
             };
 
-            // Добавляем сообщение в список сообщений
-            $scope.chat.messages.push(message);
-
-            // Записываем сообщения в хранилище
-            localStorage.setItem('messages.'+$rootScope.widget_uid, JSON.stringify($scope.chat.messages));
-
-            // Записываем чат в хранилище
-            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify($scope.chat));
+            socket.emit('chat:message:send:robot', {
+                message: message,
+                chat_uid: $scope.chat.uid,
+                widget_uid: $rootScope.widget_uid
+            });
         }
     });
 
