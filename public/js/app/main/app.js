@@ -29,8 +29,14 @@
         if (env == 'development') {
             $logProvider.debugEnabled(true);
         }
-    }).run(function($rootScope, $cookieStore, $translate, $locale, config, socket) {
+    }).run(function($rootScope, $cookieStore, $translate, $locale, $$templateCache, config, socket) {
         $rootScope.env = env || 'production';
+
+        $rootScope.$on('$routeChangeStart', function(event, next, current) {
+            if (typeof(current) !== 'undefined'){
+                $templateCache.remove(current.templateUrl);
+            }
+        });
 
         var lang = navigator.browserLanguage || navigator.language || navigator.userLanguage;
         lang = lang.substring(0, 2);
