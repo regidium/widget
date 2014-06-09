@@ -1,6 +1,7 @@
 <div id="container" ng-class="{'open': opened, '': !opened}">
     <div id="header" ng-style="{ 'background-color': settings.header_color }" style="{ 'background-color': settings.header_color }">
-        <div class="status" ng-click="switching()" ng-bind="settings.title_offline"></div>
+        <div ng-if="agent_count <= 0" class="status" ng-click="switching()" ng-bind="settings.title_offline"></div>
+        <div ng-if="agent_count > 0" class="status" ng-click="switching()" ng-bind="settings.title_online"></div>
     </div>
     <div id="content">
         <div id="employee">

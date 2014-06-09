@@ -29,6 +29,9 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     // Резервируем в $scope переменную авторизационных данных пользователя
     $scope.user = { first_name: '', email: '' };
 
+    // Резервируем в $scope переменную количества агентов в сети
+    $scope.agent_count = 0;
+
     $scope.messagePlaceholder = $translate('Write your message and press Enter');
 
     // ============================== Общие методы ==============================//
@@ -205,7 +208,7 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     function createChat() {
         // Создаем данные пользователя
         getUserInfo(function(user_data) {
-            user_data.first_name = 'Client';
+            user_data.first_name = $translate('User');
             user_data.last_name = '';
             user_data.email = '';
 
@@ -644,6 +647,32 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     });
 
     /**
+     * Пришел список агентов в сети
+     * @param Object data = {
+     *       array agents_uid
+     *       string widget_uid
+     *   }
+     */
+    socket.on('agent:online:list', function (data) {
+        $log.debug('Socket agent:online:list', data);
+
+        $scope.agent_count = data.agents_uids.length;
+    });
+
+    /**
+     * Агент подключился
+     * @param Object data = {
+     *       string agent_uid
+     *       string widget_uid
+     *   }
+     */
+    socket.on('agent:connected', function (data) {
+        $log.debug('Socket agent:connected');
+
+        $scope.agent_count++;
+    });
+
+    /**
      * Агент прислал сообщение
      * @param Object data = {
      *       Object message
@@ -777,6 +806,8 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     socket.on('agent:disconnected', function (data) {
         $log.debug('Socket agent:disconnected');
 
+        $scope.agent_count--;
+
         // Отсеиваем чужие
         if($scope.agent && $scope.agent.uid == data.agent_uid) {
             delete $scope.agent;
@@ -904,5 +935,10 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
         } else if (typeof window.attachEvent != 'undefined') {
             window.attachEvent('onmessage', onmessage);
         }
+
+        // Запрашиваем список агентов в сети
+        socket.emit('agent:online', {
+            widget_uid: $rootScope.widget_uid
+        });
     });
 }
