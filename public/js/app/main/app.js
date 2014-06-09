@@ -29,7 +29,7 @@
         if (env == 'development') {
             $logProvider.debugEnabled(true);
         }
-    }).run(function($rootScope, $cookieStore, $translate, $locale, $$templateCache, config, socket) {
+    }).run(function($rootScope, $cookieStore, $translate, $locale, $templateCache, config, socket) {
         $rootScope.env = env || 'production';
 
         $rootScope.$on('$routeChangeStart', function(event, next, current) {
