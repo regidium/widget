@@ -24,7 +24,7 @@
                 <div class="msg" ng-repeat='message in chat.messages track by $index' ng-class="{
                         'msg-output': message.sender_type == c.MESSAGE_SENDER_TYPE_USER,
                         'msg-input': message.sender_type == c.MESSAGE_SENDER_TYPE_AGENT || message.sender_type == c.MESSAGE_SENDER_TYPE_ROBOT_TO_USER
-                    }">
+                    }" ng-show="message.sender_type != c.MESSAGE_SENDER_TYPE_ROBOT_TO_AGENT">
                     <!-- Сообщение от пользователя -->
                     <div ng-if="message.sender_type == c.MESSAGE_SENDER_TYPE_USER">
                         <div class="msg-content-arrow">
