@@ -354,8 +354,8 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
      */
      function getWidgetInfo() {
          socket.emit('widget:info:get', {
-             widget_uid: $rootScope.widget_uid,
-             chat_uid: $scope.chat.uid
+             to: 2,
+             widget_uid: $rootScope.widget_uid
          });
      }
 
