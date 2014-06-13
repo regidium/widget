@@ -8,6 +8,8 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     // Получаем UID виджета
     $rootScope.widget_uid = $routeParams.uid;
 
+    var error = false;
+
     var soundChat = sound.init('chat');
     var soundBell = sound.init('bell');
 
@@ -221,6 +223,47 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
                 widget_uid: $rootScope.widget_uid,
                 chat: $scope.chat
             });
+        });
+
+        /**
+         * Ждем оповещания о создании чата
+         * @param Object data = {
+         *       Object chat
+         *       string widget_uid
+         *   }
+         */
+        socket.on('chat:created', function (data) {
+            $log.debug('Socket chat:created');
+
+            // Проверяем триггер
+            checkTrigger($rootScope.c.TRIGGER_EVENT_WIDGET_CREATED);
+
+            // Оповещаем о подключении чата
+            socket.emit('chat:connected', {
+                chat_uid: data.chat.uid
+            });
+            // Заполняем переменную чат
+            $scope.chat = data.chat;
+            // Добавляем чат в cookie
+            //$rootScope.setCookie('chat', data.chat)
+            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify(data.chat));
+            // Заполняем переменную сообщения чата
+            $scope.chat.messages = [];
+            // Запрашиваем информацию о виджете
+            getWidgetInfo();
+            // Добавляем статус чата в cookie (закрыт)
+            //$rootScope.setCookie('opened', false);
+            localStorage.setItem('opened.'+$rootScope.widget_uid, false);
+            $scope.opened = false;
+            // Добавляем статус авторизации в cookie (не авторизирован)
+            //$rootScope.setCookie('auth', false);
+            localStorage.setItem('auth.'+$rootScope.widget_uid, false);
+            $scope.auth = false;
+            // Сворачиваем виджет
+            //$('#content').hide();
+            angular.element('#content').hide();
+
+            checkUrl();
         });
     }
 
@@ -654,7 +697,7 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
      *   }
      */
     socket.on('agent:online:list', function (data) {
-        $log.debug('Socket agent:online:list', data);
+        $log.debug('Socket agent:online:list');
 
         $scope.agent_count = data.agents_uids.length;
     });
@@ -828,6 +871,32 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
         }
     });
 
+    /**
+     * Ошибка получения данных
+     * @param Object data = {
+     *    Object chat
+     *    string widget_uid
+     * }
+     */
+    socket.on('chat:error:sended', function (data) {
+        $log.debug('Socket chat:error:sended');
+
+
+        if ((data.chat_uid && data.chat_uid == $scope.chat.uid ) || (data.chat && data.chat.uid && data.chat.uid == $scope.chat.uid )) {
+            localStorage.removeItem('chat.'+$rootScope.widget_uid);
+            localStorage.removeItem('messages.'+$rootScope.widget_uid);
+            localStorage.removeItem('auth.'+$rootScope.widget_uid);
+            localStorage.removeItem('opened.'+$rootScope.widget_uid);
+            localStorage.removeItem('url.'+$rootScope.widget_uid);
+
+            if (!error) {
+                createChat();
+            } else {
+                error = true;
+            }
+        }
+    });
+
     // ============================================================================= //
 
     // Ищем чат в cookie и заполняем $scope переменную
@@ -839,47 +908,6 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
     // Если чат не найден в cookie - создаем чат
     if (!$scope.chat.uid) {
         createChat();
-
-        /**
-         * Ждем оповещания о создании чата
-         * @param Object data = {
-         *       Object chat
-         *       string widget_uid
-         *   }
-         */
-        socket.on('chat:created', function (data) {
-            $log.debug('Socket chat:created');
-
-            // Проверяем триггер
-            checkTrigger($rootScope.c.TRIGGER_EVENT_WIDGET_CREATED);
-
-            // Оповещаем о подключении чата
-            socket.emit('chat:connected', {
-                chat_uid: data.chat.uid
-            });
-            // Заполняем переменную чат
-            $scope.chat = data.chat;
-            // Добавляем чат в cookie
-            //$rootScope.setCookie('chat', data.chat)
-            localStorage.setItem('chat.'+$rootScope.widget_uid, JSON.stringify(data.chat));
-            // Заполняем переменную сообщения чата
-            $scope.chat.messages = [];
-            // Запрашиваем информацию о виджете
-            getWidgetInfo();
-            // Добавляем статус чата в cookie (закрыт)
-            //$rootScope.setCookie('opened', false);
-            localStorage.setItem('opened.'+$rootScope.widget_uid, false);
-            $scope.opened = false;
-            // Добавляем статус авторизации в cookie (не авторизирован)
-            //$rootScope.setCookie('auth', false);
-            localStorage.setItem('auth.'+$rootScope.widget_uid, false);
-            $scope.auth = false;
-            // Сворачиваем виджет
-            //$('#content').hide();
-            angular.element('#content').hide();
-
-            checkUrl();
-        });
     } else {
         // Заполняем переменную агент
         $scope.agent = $scope.chat.agent;
