@@ -914,6 +914,10 @@ function MainCtrl($rootScope, $scope, $http, $timeout, $log, $document, $routePa
 
         // Получаем текущий URL чата
         $scope.chat.current_url = $document[0].referrer;
+
+        if (!$scope.chat.status) {
+            $scope.chat.status = 1;
+        }
         // Оповещаем о подключении чата
         socket.emit('chat:connect', {
             chat:       $scope.chat,
